@@ -1,0 +1,102 @@
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:id="@+id/card"
+    style="@style/BUTTON"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:layout_marginHorizontal="10dp"
+    android:layout_marginVertical="5dp"
+    android:background="@color/dark_dark">
+
+    <LinearLayout
+        android:layout_width="0dp"
+        android:layout_height="120dp"
+        android:layout_margin="10dp"
+        android:orientation="horizontal"
+        android:weightSum="10"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent">
+
+        <ImageView
+            android:id="@+id/slikaItem"
+            android:layout_width="150dp"
+            android:layout_height="match_parent"
+            android:layout_marginRight="9dp"
+            android:layout_weight="3"
+            tools:srcCompat="@tools:sample/avatars" />
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:layout_weight="7"
+            android:orientation="vertical"
+            android:weightSum="3">
+
+            <TextView
+                android:id="@+id/nazivItem"
+                android:layout_width="match_parent"
+                android:layout_height="0dp"
+                android:layout_gravity="center|center"
+                android:layout_weight="1"
+                android:gravity="center"
+                android:text="naziv biljke"
+                android:textAlignment="center"
+                android:textColor="@color/light_light" />
+
+            <TextView
+                android:id="@+id/profilOkusaItem"
+                android:layout_width="match_parent"
+                android:layout_height="0dp"
+                android:layout_gravity="center|center"
+                android:layout_weight="1"
+                android:gravity="center"
+                android:text="profil okusa"
+                android:textAlignment="center"
+                android:textColor="@color/light_light" />
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="0dp"
+                android:layout_weight="1"
+                android:orientation="horizontal">
+
+                <TextView
+                    android:id="@+id/jelo1Item"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_gravity="center"
+                    android:layout_marginHorizontal="0sp"
+                    android:layout_weight="1"
+                    android:text="jelo1"
+                    android:textAlignment="center"
+                    android:textColor="@color/light_light" />
+
+                <TextView
+                    android:id="@+id/jelo2Item"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_gravity="center"
+                    android:layout_marginHorizontal="0sp"
+                    android:layout_weight="1"
+                    android:text="jelo2"
+                    android:textAlignment="center"
+                    android:textColor="@color/light_light" />
+
+                <TextView
+                    android:id="@+id/jelo3Item"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_gravity="center"
+                    android:layout_marginHorizontal="0sp"
+                    android:layout_weight="1"
+                    android:text="jelo3"
+                    android:textAlignment="center"
+                    android:textColor="@color/light_light" />
+            </LinearLayout>
+        </LinearLayout>
+    </LinearLayout>
+</androidx.constraintlayout.widget.ConstraintLayout>

@@ -1,0 +1,7 @@
+<resources>
+    <string name="app_name">Flora</string>
+    <string name="medical">Medicinski fokus</string>
+    <string name="cook">Kuharski fokus</string>
+    <string name="botanic">Botanički fokus</string>
+    <string name="resetBtn">Reset</string>
+</resources>
