@@ -7,7 +7,8 @@
 
     <style name="BACKGROUND">
         <item name="background">@color/dark_dark</item>
-        <item name="backgroundTint">@color/dark_dark</item>
+        <item name="cardBackgroundColor">@color/dark_dark</item>
+        <item name="android:textColor">@color/light_light</item>
     </style>
 
     <style name="BUTTON">

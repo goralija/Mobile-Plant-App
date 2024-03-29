@@ -6,8 +6,9 @@
     </style>
 
     <style name="BACKGROUND">
-        <item name="background">@color/brown</item>
-        <item name="backgroundTint">@color/brown</item>
+        <item name="background">@color/light_light</item>
+        <item name="cardBackgroundColor">@color/light_light</item>
+        <item name="android:textColor">@color/dark_dark</item>
     </style>
 
     <style name="BUTTON">
