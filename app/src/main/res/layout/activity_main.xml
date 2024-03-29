@@ -3,7 +3,6 @@
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
     android:id="@+id/main"
-    style="@style/BACKGROUND"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     tools:context=".MainActivity">
@@ -28,13 +27,16 @@
 
         <Spinner
             android:id="@+id/modSpinner"
+            style="@style/BACKGROUND"
             android:layout_width="0dp"
             android:layout_height="60dp"
             android:contextClickable="true"
-            android:dropDownWidth="match_parent"
             android:fadingEdge="none"
             android:focusable="auto"
+            android:layoutMode="clipBounds"
+            android:spinnerMode="dialog"
             android:textAlignment="center"
+            android:theme="@style/BACKGROUND"
             app:layout_constraintBottom_toBottomOf="parent"
             app:layout_constraintEnd_toStartOf="@+id/resetBtn"
             app:layout_constraintHorizontal_weight="12"

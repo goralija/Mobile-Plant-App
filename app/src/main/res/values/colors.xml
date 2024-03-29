@@ -2,14 +2,8 @@
 <resources>
     <color name="black">#FF000000</color>
     <color name="white">#FFFFFFFF</color>
-    <color name="olive">#606c38</color>
-    <color name="dark_olive">#283618</color>
-    <color name="beige">#fefae0</color>
-    <color name="light_brown">#dda15e</color>
-    <color name="brown">#bc6c25</color>
-    <color name="dark_brown">#582f0e</color>
 
-    <color name="dark_dark">#12220c</color>
+    <color name="dark_dark">#262E23</color>
     <color name="dark_mid">#214505</color>
     <color name="dark_light">#38591a</color>
     <color name="mid_dark">#1c3e04</color> <!-- ili 254319 -->
@@ -17,5 +11,5 @@
     <color name="mid_light">#7fc63d</color>
     <color name="light_dark">#82c766</color>
     <color name="light_mid">#B9F88C</color>
-    <color name="light_light">#E5F3D7</color>
+    <color name="light_light">#EFF6E7</color>
 </resources>

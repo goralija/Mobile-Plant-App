@@ -13,12 +13,12 @@
         android:layout_height="0dp"
         android:layout_marginHorizontal="10dp"
         android:layout_marginVertical="7dp"
-        app:cardCornerRadius="30dp"
+        app:cardCornerRadius="23dp"
         app:cardElevation="4dp"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toTopOf="parent" >
+        app:layout_constraintTop_toTopOf="parent">
 
         <LinearLayout
             android:layout_width="match_parent"
@@ -48,6 +48,7 @@
 
                 <TextView
                     android:id="@+id/nazivItem"
+                    style="@style/TEXT"
                     android:layout_width="match_parent"
                     android:layout_height="0dp"
                     android:layout_gravity="center|center"
@@ -58,6 +59,7 @@
 
                 <TextView
                     android:id="@+id/profilOkusaItem"
+                    style="@style/TEXT"
                     android:layout_width="match_parent"
                     android:layout_height="0dp"
                     android:layout_gravity="center|center"
@@ -74,6 +76,7 @@
 
                     <TextView
                         android:id="@+id/jelo1Item"
+                        style="@style/TEXT"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
                         android:layout_gravity="center"
@@ -84,6 +87,7 @@
 
                     <TextView
                         android:id="@+id/jelo2Item"
+                        style="@style/TEXT"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
                         android:layout_gravity="center"
@@ -94,6 +98,7 @@
 
                     <TextView
                         android:id="@+id/jelo3Item"
+                        style="@style/TEXT"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
                         android:layout_gravity="center"
