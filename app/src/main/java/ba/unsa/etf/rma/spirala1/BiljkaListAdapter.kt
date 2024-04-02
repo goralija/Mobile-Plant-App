@@ -28,16 +28,16 @@ class BiljkaListAdapter(private var biljke: List<Biljka>, private var selectedMo
     override fun onBindViewHolder(holder: BiljkaViewHolder, position: Int) {
         holder.ime.text = biljke[position].naziv
         holder.upozorenje?.text = biljke[position].medicinskoUpozorenje
-        holder.korist1?.text = biljke[position].medicinskeKoristi[0].toString()
-        holder.korist2?.text = biljke[position].medicinskeKoristi.getOrNull(1)?.toString() ?: ""
-        holder.korist3?.text = biljke[position].medicinskeKoristi.getOrNull(2)?.toString() ?: ""
+        holder.korist1?.text = biljke[position].medicinskeKoristi[0].opis
+        holder.korist2?.text = biljke[position].medicinskeKoristi.getOrNull(1)?.opis ?: ""
+        holder.korist3?.text = biljke[position].medicinskeKoristi.getOrNull(2)?.opis ?: ""
         holder.jelo1?.text = biljke[position].jela[0]
         holder.jelo2?.text = biljke[position].jela.getOrNull(1)?.toString() ?: ""
         holder.jelo3?.text = biljke[position].jela.getOrNull(2)?.toString() ?: ""
-        holder.klimatskiTip?.text = biljke[position].klimatskiTipovi[0].toString()
+        holder.klimatskiTip?.text = biljke[position].klimatskiTipovi[0].opis
         holder.porodica?.text = biljke[position].porodica
-        holder.profilOkusa?.text = biljke[position].profilOkusa.toString()
-        holder.zemljisniTip?.text = biljke[position].zemljisniTipovi[0].toString()
+        holder.profilOkusa?.text = biljke[position].profilOkusa.opis
+        holder.zemljisniTip?.text = biljke[position].zemljisniTipovi[0].naziv
         val context: Context = holder.slika.context
         var id: Int = context.resources.getIdentifier("cvijet","drawable", context.packageName)
         holder.slika.setImageResource(id)
