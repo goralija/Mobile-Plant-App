@@ -14,9 +14,14 @@
         <item name="android:textColor">@color/dark_dark</item>
     </style>
 
+    <style name="BACKGROUND2">
+        <item name="android:backgroundTint">@color/dark_dark</item>
+    </style>
+
     <style name="BUTTON">
         <item name="backgroundTint">@color/dark_light</item>
         <item name="android:textColor">@color/light_light</item>
+        <item name="tint">@color/light_light</item>
     </style>
 
     <style name="TEXT">

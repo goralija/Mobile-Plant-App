@@ -75,4 +75,35 @@
 
     </androidx.recyclerview.widget.RecyclerView>
 
+    <androidx.cardview.widget.CardView
+        android:id="@+id/stalak"
+        style="@style/BACKGROUND2"
+        android:layout_width="match_parent"
+        android:layout_height="72dp"
+        android:layout_marginBottom="-14dp"
+        android:clickable="true"
+        android:elevation="23dp"
+        android:fadingEdge="horizontal|vertical"
+        android:outlineSpotShadowColor="#5CB552"
+        app:cardCornerRadius="18dp"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent" />
+
+    <com.google.android.material.floatingactionbutton.FloatingActionButton
+        android:id="@+id/novaBiljkaBtn"
+        style="@style/BUTTON"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:clickable="true"
+        android:tintMode="src_in"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintHorizontal_bias="0.92"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent"
+        app:layout_constraintVertical_bias="0.96"
+        app:shapeAppearance="@style/Widget.Material3.CircularProgressIndicator.Small"
+        app:srcCompat="@android:drawable/ic_input_add" />
+
 </androidx.constraintlayout.widget.ConstraintLayout>

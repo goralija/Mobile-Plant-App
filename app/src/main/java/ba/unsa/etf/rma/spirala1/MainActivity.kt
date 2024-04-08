@@ -1,5 +1,6 @@
 package ba.unsa.etf.rma.spirala1
 
+import android.content.Intent
 import android.os.Bundle
 import android.view.View
 import android.widget.AdapterView
@@ -11,6 +12,7 @@ import androidx.activity.enableEdgeToEdge
 import androidx.appcompat.app.AppCompatActivity
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
+import com.google.android.material.floatingactionbutton.FloatingActionButton
 
 class MainActivity : AppCompatActivity() {
     private lateinit var biljkePogled: RecyclerView
@@ -49,6 +51,14 @@ class MainActivity : AppCompatActivity() {
         resetButton.setOnClickListener {
             biljkeLista = biljke
             biljkeAdapter.updateBiljke(biljkeLista)
+        }
+
+        val novaBiljkaBtn = findViewById<FloatingActionButton>(R.id.novaBiljkaBtn)
+        novaBiljkaBtn.setOnClickListener {
+            // Create an intent to open the new activity
+            val intent = Intent(this, NovaBiljkaActivity::class.java)
+            // Start the new activity
+            startActivity(intent)
         }
 
         val spinner = findViewById<Spinner>(R.id.modSpinner)

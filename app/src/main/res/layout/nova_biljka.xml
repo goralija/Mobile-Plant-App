@@ -1,0 +1,199 @@
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    xmlns:app="http://schemas.android.com/apk/res-auto">
+    <ScrollView
+        android:layout_width="match_parent"
+        android:layout_height="match_parent">
+
+<androidx.constraintlayout.widget.ConstraintLayout style="@style/BACKGROUND"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:nestedScrollingEnabled="true"
+    android:padding="16dp"
+    tools:context=".NovaBiljkaActivity">
+
+    <EditText
+        android:id="@+id/nazivET"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:layout_marginVertical="5dp"
+        android:hint="Naziv"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent" />
+
+    <EditText
+        android:id="@+id/porodicaET"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:layout_marginVertical="5dp"
+        android:hint="Porodica"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/nazivET" />
+
+    <EditText
+        android:id="@+id/medicinskoUpozorenjeET"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:layout_marginVertical="5dp"
+        android:hint="Medicinsko upozorenje"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/porodicaET" />
+
+    <EditText
+        android:id="@+id/jeloET"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:layout_marginVertical="5dp"
+        android:hint="Unesite jelo"
+        app:layout_constraintEnd_toStartOf="@+id/dodajJeloBtn"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/medicinskoUpozorenjeET" />
+
+    <TextView
+        android:id="@+id/molbaMedicinskaKorist"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="Molimo označite jedno ili više polja:"
+        app:layout_constraintBottom_toTopOf="@id/medicinskaKoristLV"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent" />
+
+    <ListView
+        android:id="@+id/medicinskaKoristLV"
+        style="@android:style/Widget.Material.ListView.DropDown"
+        android:layout_width="0dp"
+        android:layout_height="300dp"
+        android:layout_marginVertical="30dp"
+        android:choiceMode="multipleChoice"
+        android:scrollbars="none"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/jeloET" />
+
+    <TextView
+        android:id="@+id/molbaKlimatskiTip"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="Molimo označite jedno ili više polja:"
+        app:layout_constraintBottom_toTopOf="@id/klimatskiTipLV"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent" />
+
+    <ListView
+        android:id="@+id/klimatskiTipLV"
+        style="@android:style/Widget.Material.ListView.DropDown"
+        android:layout_width="0dp"
+        android:layout_height="300dp"
+        android:layout_marginVertical="30dp"
+        android:scrollbars="none"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/medicinskaKoristLV" />
+
+    <TextView
+        android:id="@+id/molbaZemljisniTip"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="Molimo označite jedno ili više polja:"
+        app:layout_constraintBottom_toTopOf="@id/zemljisniTipLV"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent" />
+
+    <ListView
+        android:id="@+id/zemljisniTipLV"
+        style="@android:style/Widget.Material.ListView.DropDown"
+        android:layout_width="0dp"
+        android:layout_height="300dp"
+        android:layout_marginVertical="30dp"
+        android:choiceMode="multipleChoice"
+        android:scrollbars="none"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/klimatskiTipLV" />
+
+    <TextView
+        android:id="@+id/molbaProfilOkusa"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="Molimo označite jedno polje:"
+        app:layout_constraintBottom_toTopOf="@id/profilOkusaLV"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent" />
+
+    <ListView
+        android:id="@+id/profilOkusaLV"
+        style="@android:style/Widget.Material.ListView.DropDown"
+        android:layout_width="0dp"
+        android:layout_height="390dp"
+        android:layout_marginVertical="30dp"
+        android:choiceMode="singleChoice"
+        android:scrollbars="none"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/zemljisniTipLV" />
+
+    <TextView
+        android:id="@+id/obavijestJela"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="U listi ispod su dodata jela za trenutnu biljku:"
+        app:layout_constraintBottom_toTopOf="@id/jelaLV"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent" />
+
+    <ListView
+        android:id="@+id/jelaLV"
+        android:layout_width="0dp"
+        android:layout_height="190dp"
+        android:layout_marginVertical="30dp"
+        android:scrollbars="none"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/profilOkusaLV" />
+
+        <Button
+            android:id="@+id/dodajJeloBtn"
+            style="@style/BUTTON"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Dodaj jelo"
+            app:layout_constraintBottom_toBottomOf="@+id/jeloET"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintTop_toTopOf="@+id/jeloET" />
+
+    <Button
+        android:id="@+id/dodajBiljkuBtn"
+        style="@style/BUTTON"
+        android:layout_width="0dp"
+        android:layout_height="60dp"
+        android:layout_marginStart="54dp"
+        android:layout_marginTop="23dp"
+        android:layout_marginEnd="54dp"
+        android:elevation="30dp"
+        android:text="Dodaj biljku"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintHorizontal_bias="0.511"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/uslikajBiljkuBtn" />
+
+    <Button
+        android:id="@+id/uslikajBiljkuBtn"
+        style="@style/BUTTON"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="Uslikaj biljku"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/jelaLV"
+        app:layout_constraintVertical_bias="0.25" />
+    </androidx.constraintlayout.widget.ConstraintLayout>
+    </ScrollView>
+
+</androidx.constraintlayout.widget.ConstraintLayout>

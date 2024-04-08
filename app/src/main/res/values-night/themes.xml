@@ -14,9 +14,14 @@
         <item name="android:textColor">@color/light_light</item>
     </style>
 
+    <style name="BACKGROUND2">
+        <item name="cardBackgroundColor">@color/light_light</item>
+    </style>
+
     <style name="BUTTON">
         <item name="backgroundTint">@color/light_light</item>
         <item name="android:textColor">@color/dark_mid</item>
+        <item name="tint">@color/dark_mid</item>
     </style>
 
     <style name="TEXT">
