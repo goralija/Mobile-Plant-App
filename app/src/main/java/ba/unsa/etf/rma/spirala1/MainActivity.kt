@@ -46,17 +46,6 @@ class MainActivity : AppCompatActivity() {
         enableEdgeToEdge()
         setContentView(R.layout.activity_main)
 
-
-
-        val intent = intent
-        if (intent.hasExtra("novaBiljka")) {
-            val novaBiljka = intent.getParcelableExtra<Biljka>("novaBiljka")
-            biljkeLista = listOf(novaBiljka!!)
-        }
-
-
-
-
         val resetButton = findViewById<Button>(R.id.resetBtn)
         resetButton.setOnClickListener {
             biljkeLista = biljke
@@ -95,6 +84,19 @@ class MainActivity : AppCompatActivity() {
                 biljkeAdapter.updateBiljke(biljkeLista)
             }
             override fun onNothingSelected(parent: AdapterView<*>) {}
+        }
+
+        val intent = intent
+        if (intent.hasExtra("novaBiljka")) {
+            val novaBiljka = intent.getParcelableExtra<Biljka>("novaBiljka")
+            // ovdje treba dodati novaBiljka u listu biljkeList
+            biljkeLista = biljkeLista + novaBiljka!!
+
+            biljkePogled = findViewById(R.id.biljkeRV)
+            biljkeAdapter = BiljkaListAdapter(listOf(),modPrikaza, itemClickListener)
+            biljkePogled.adapter = biljkeAdapter
+
+            biljkeAdapter.updateBiljke(biljkeLista)
         }
     }
 }

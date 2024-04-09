@@ -22,7 +22,6 @@ data class Biljka(
         parcel.createStringArrayList() ?: emptyList(),
         parcel.createStringArrayList()?.map { KlimatskiTip.valueOf(it) } ?: emptyList(),
         parcel.createStringArrayList()?.map { Zemljište.valueOf(it) } ?: emptyList()
-
     )
 
     override fun describeContents(): Int {
