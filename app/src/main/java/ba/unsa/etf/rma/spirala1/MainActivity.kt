@@ -41,11 +41,21 @@ class MainActivity : AppCompatActivity() {
             }
         }
     }
-
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         enableEdgeToEdge()
         setContentView(R.layout.activity_main)
+
+
+
+        val intent = intent
+        if (intent.hasExtra("novaBiljka")) {
+            val novaBiljka = intent.getParcelableExtra<Biljka>("novaBiljka")
+            biljkeLista = listOf(novaBiljka!!)
+        }
+
+
+
 
         val resetButton = findViewById<Button>(R.id.resetBtn)
         resetButton.setOnClickListener {
@@ -84,9 +94,7 @@ class MainActivity : AppCompatActivity() {
 
                 biljkeAdapter.updateBiljke(biljkeLista)
             }
-            override fun onNothingSelected(parent: AdapterView<*>) {
-                // Do nothing
-            }
+            override fun onNothingSelected(parent: AdapterView<*>) {}
         }
     }
 }

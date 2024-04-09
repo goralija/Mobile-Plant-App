@@ -147,12 +147,13 @@ class NovaBiljkaActivity : AppCompatActivity() {
                         selectedZemljisniTip.add(Zemljište.values()[i])
                 }
                 val selectedProfilOkusa = ProfilOkusaBiljke.values()[profilOkusaLV.checkedItemPosition]
-                val jela = jelaList.toList()
+                var jela = jelaList.toList()
                 val novaBiljka = Biljka(naziv, porodica, medicinskoUpozorenje,
                     selectedMedicinskaKorist, selectedProfilOkusa, jela, selectedKlimatskiTip,
                     selectedZemljisniTip)
 
-                val intent = Intent(this, MainActivity::class.java).putExtra(naziv,novaBiljka)
+                val intent = Intent(this, MainActivity::class.java).putExtra("novaBiljka",
+                    novaBiljka)
                 startActivity(intent)
                 finish()
             }
