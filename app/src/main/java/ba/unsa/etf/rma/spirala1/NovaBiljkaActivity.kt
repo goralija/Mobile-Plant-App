@@ -1,10 +1,15 @@
 package ba.unsa.etf.rma.spirala1
 
+import android.content.ActivityNotFoundException
 import android.content.Intent
+import android.graphics.Bitmap
 import android.os.Bundle
+import android.provider.MediaStore
 import android.widget.ArrayAdapter
 import android.widget.EditText
+import android.widget.ImageView
 import android.widget.ListView
+import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
 import com.google.android.material.button.MaterialButton
 
@@ -22,10 +27,7 @@ class NovaBiljkaActivity : AppCompatActivity() {
     private lateinit var dodajJeloBtn: MaterialButton
     private lateinit var dodajBiljkuBtn: MaterialButton
     private lateinit var uslikajBiljkuBtn: MaterialButton
-    private val medicinskaMolba = R.id.molbaMedicinskaKorist
-    private val klimaMolba = R.id.molbaKlimatskiTip
-    private val zemljisteMolba = R.id.molbaZemljisniTip
-    private val okusMolba = R.id.molbaProfilOkusa
+    private lateinit var slikaIV: ImageView
     private val jelaList = mutableListOf<String>()
 
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -50,6 +52,7 @@ class NovaBiljkaActivity : AppCompatActivity() {
         dodajJeloBtn = findViewById(R.id.dodajJeloBtn)
         dodajBiljkuBtn = findViewById(R.id.dodajBiljkuBtn)
         uslikajBiljkuBtn = findViewById(R.id.uslikajBiljkuBtn)
+        slikaIV = findViewById(R.id.slikaIV)
     }
 
     private fun setupListViews() {
@@ -123,22 +126,45 @@ class NovaBiljkaActivity : AppCompatActivity() {
 
         dodajBiljkuBtn.setOnClickListener {
             if (validateInputs()) {
-                val intent = Intent(this, MainActivity::class.java)
-                //treba dodati još da se za Recycler View servira dodata biljka, uz sve one koje
-                // su vec bile tu
+                val naziv = nazivET.text.toString()
+                val porodica = porodicaET.text.toString()
+                val medicinskoUpozorenje = medicinskoUpozorenjeET.text.toString()
 
-                // Dodavanje dodatnih podataka u Intent ako je potrebno
-                // Na primjer: intent.putExtra("naziv", nazivET.text.toString())
+                val selectedMedicinskaKorist = mutableListOf<MedicinskaKorist>()
+                val selectedKlimatskiTip = mutableListOf<KlimatskiTip>()
+                val selectedZemljisniTip = mutableListOf<Zemljište>()
+
+                for (i in 0 until medicinskaKoristLV.count) {
+                    if (medicinskaKoristLV.isItemChecked(i))
+                        selectedMedicinskaKorist.add(MedicinskaKorist.values()[i])
+                }
+                for (i in 0 until klimatskiTipLV.count) {
+                    if (klimatskiTipLV.isItemChecked(i))
+                        selectedKlimatskiTip.add(KlimatskiTip.values()[i])
+                }
+                for (i in 0 until zemljisniTipLV.count) {
+                    if (zemljisniTipLV.isItemChecked(i))
+                        selectedZemljisniTip.add(Zemljište.values()[i])
+                }
+                val selectedProfilOkusa = ProfilOkusaBiljke.values()[profilOkusaLV.checkedItemPosition]
+                val jela = jelaList.toList()
+                val novaBiljka = Biljka(naziv, porodica, medicinskoUpozorenje,
+                    selectedMedicinskaKorist, selectedProfilOkusa, jela, selectedKlimatskiTip,
+                    selectedZemljisniTip)
+
+                val intent = Intent(this, MainActivity::class.java).putExtra(naziv,novaBiljka)
                 startActivity(intent)
                 finish()
             }
         }
 
         uslikajBiljkuBtn.setOnClickListener{
-            //inicira intent za slikanje slike nakon čega sliku prikazuje u ImageView elementu (R
-            // .id.slikaIV)
-            //slika se za sada ne mora prenositi iz forme za dodavanje, u RV se moze i dalje
-            // drzati obicna slika
+            val takePictureIntent = Intent(MediaStore.ACTION_IMAGE_CAPTURE)
+            try {
+                startActivityForResult(takePictureIntent,1)
+            } catch (e: ActivityNotFoundException) {
+                Toast.makeText(this, "Nema aplikacije za slikanje.", Toast.LENGTH_SHORT).show()
+            }
         }
     }
 
@@ -149,35 +175,36 @@ class NovaBiljkaActivity : AppCompatActivity() {
 
     private fun validateInputs(): Boolean {
         var valid = true
-
         if (nazivET.text.isEmpty() || nazivET.text.length !in 2..20) {
             nazivET.error = "Naziv mora imati između 2 i 20 znakova"
             valid = false
-            return valid
         }
         if (porodicaET.text.isEmpty() || porodicaET.text.length !in 2..20) {
             porodicaET.error = "Porodica mora imati između 2 i 20 znakova"
             valid = false
-            return valid
         }
         if (medicinskoUpozorenjeET.text.isEmpty() || medicinskoUpozorenjeET.text.length !in 2..20) {
             medicinskoUpozorenjeET.error = "Upozorenje mora imati između 2 i 20 znakova"
             valid = false
-            return valid
         }
         if (jelaList.isEmpty()) {
             jeloET.error = "Dodaj barem jedno jelo"
             valid = false
-            return valid
         }
         val listViews = listOf(medicinskaKoristLV, klimatskiTipLV, zemljisniTipLV, profilOkusaLV)
-        valid = listViews.all { it.checkedItemPosition != ListView.INVALID_POSITION }
-        if (!valid) {
-            dodajBiljkuBtn.error = "ne valja"
-            dodajBiljkuBtn.error.toString()
+        if (!listViews.all { it.checkedItemCount >= 1 }) {
+            dodajBiljkuBtn.error = "Potrebno je da označite barem po jednu stavku sa svake liste " +
+                    "navedene iznad"
+            valid = false
         }
-
-
         return valid
+    }
+
+    override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
+        super.onActivityResult(requestCode, resultCode, data)
+        if (requestCode == 1 && resultCode == RESULT_OK) {
+            val imageBitmap = data?.extras?.get("data") as Bitmap
+            slikaIV.setImageBitmap(imageBitmap)
+        }
     }
 }
