@@ -57,22 +57,22 @@ class NovaBiljkaActivity : AppCompatActivity() {
 
     private fun setupListViews() {
         val medicinskaKoristListView: ListView = findViewById(R.id.medicinskaKoristLV)
-        val medicinskaKoristArray = MedicinskaKorist.values().map { it.toString() }.toTypedArray()
+        val medicinskaKoristArray = MedicinskaKorist.values().map { it.opis }.toTypedArray()
         val medicinskaKoristAdapter = ArrayAdapter(this, android.R.layout.simple_list_item_multiple_choice, medicinskaKoristArray)
         medicinskaKoristListView.adapter = medicinskaKoristAdapter
 
         val klimatskiTipListView: ListView = findViewById(R.id.klimatskiTipLV)
-        val klimatskiTipArray = KlimatskiTip.values().map { it.toString() }.toTypedArray()
+        val klimatskiTipArray = KlimatskiTip.values().map { it.opis }.toTypedArray()
         val klimatskiTipAdapter = ArrayAdapter(this, android.R.layout.simple_list_item_multiple_choice, klimatskiTipArray)
         klimatskiTipListView.adapter = klimatskiTipAdapter
 
         val zemljisniTipListView: ListView = findViewById(R.id.zemljisniTipLV)
-        val zemljisniTipArray = Zemljište.values().map { it.toString() }.toTypedArray()
+        val zemljisniTipArray = Zemljište.values().map { it.naziv }.toTypedArray()
         val zemljisniTipAdapter = ArrayAdapter(this, android.R.layout.simple_list_item_multiple_choice, zemljisniTipArray)
         zemljisniTipListView.adapter = zemljisniTipAdapter
 
         val ProfilOkusaListView: ListView = findViewById(R.id.profilOkusaLV)
-        val profilOkusaArray = ProfilOkusaBiljke.values().map { it.toString() }.toTypedArray()
+        val profilOkusaArray = ProfilOkusaBiljke.values().map { it.opis }.toTypedArray()
         val profilOkusaAdapter = ArrayAdapter(this, android.R.layout
             .simple_list_item_multiple_choice, profilOkusaArray)
         ProfilOkusaListView.adapter = profilOkusaAdapter

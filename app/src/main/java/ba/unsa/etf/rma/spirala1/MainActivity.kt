@@ -24,17 +24,17 @@ class MainActivity : AppCompatActivity() {
         override fun onItemClick(biljka: Biljka) {
             when (modPrikaza) {
                 getString(R.string.botanic) -> {
-                    val filteredList = filtrirajBotanicki(biljke, biljka)
+                    val filteredList = filtrirajBotanicki(biljkeLista, biljka)
                     biljkeLista = filteredList
                     biljkeAdapter.updateBiljke(filteredList)
                 }
                 getString(R.string.medical) -> {
-                    val filteredList = filtrirajMedicinski(biljke, biljka)
+                    val filteredList = filtrirajMedicinski(biljkeLista, biljka)
                     biljkeLista = filteredList
                     biljkeAdapter.updateBiljke(filteredList)
                 }
                 getString(R.string.cook) -> {
-                    val filteredList = filtrirajKuharski(biljke, biljka)
+                    val filteredList = filtrirajKuharski(biljkeLista, biljka)
                     biljkeLista = filteredList
                     biljkeAdapter.updateBiljke(filteredList)
                 }
