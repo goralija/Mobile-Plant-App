@@ -25,17 +25,17 @@ class MainActivity : AppCompatActivity() {
             when (modPrikaza) {
                 getString(R.string.botanic) -> {
                     val filteredList = filtrirajBotanicki(biljkeLista, biljka)
-                    biljkeLista = filteredList
+                    biljkeLista = filteredList.toMutableList()
                     biljkeAdapter.updateBiljke(filteredList)
                 }
                 getString(R.string.medical) -> {
                     val filteredList = filtrirajMedicinski(biljkeLista, biljka)
-                    biljkeLista = filteredList
+                    biljkeLista = filteredList.toMutableList()
                     biljkeAdapter.updateBiljke(filteredList)
                 }
                 getString(R.string.cook) -> {
                     val filteredList = filtrirajKuharski(biljkeLista, biljka)
-                    biljkeLista = filteredList
+                    biljkeLista = filteredList.toMutableList()
                     biljkeAdapter.updateBiljke(filteredList)
                 }
             }
@@ -46,6 +46,9 @@ class MainActivity : AppCompatActivity() {
         enableEdgeToEdge()
         setContentView(R.layout.activity_main)
 
+        biljkePogled = findViewById(R.id.biljkeRV)
+        biljkePogled.layoutManager = LinearLayoutManager(this, LinearLayoutManager.VERTICAL, false)
+
         val resetButton = findViewById<Button>(R.id.resetBtn)
         resetButton.setOnClickListener {
             biljkeLista = biljke
@@ -54,9 +57,7 @@ class MainActivity : AppCompatActivity() {
 
         val novaBiljkaBtn = findViewById<FloatingActionButton>(R.id.novaBiljkaBtn)
         novaBiljkaBtn.setOnClickListener {
-            // Create an intent to open the new activity
             val intent = Intent(this, NovaBiljkaActivity::class.java)
-            // Start the new activity
             startActivity(intent)
         }
 
@@ -71,32 +72,12 @@ class MainActivity : AppCompatActivity() {
                 val selectedOption = parent.getItemAtPosition(position) as String
                 Toast.makeText(this@MainActivity, "Selected: $selectedOption", Toast.LENGTH_SHORT).show()
                 modPrikaza = selectedOption
-
-                biljkePogled = findViewById(R.id.biljkeRV)
-                biljkePogled.layoutManager = LinearLayoutManager(
-                    parent.context,
-                    LinearLayoutManager.VERTICAL,
-                    false
-                )
                 biljkeAdapter = BiljkaListAdapter(listOf(),modPrikaza, itemClickListener)
                 biljkePogled.adapter = biljkeAdapter
 
                 biljkeAdapter.updateBiljke(biljkeLista)
             }
             override fun onNothingSelected(parent: AdapterView<*>) {}
-        }
-
-        val intent = intent
-        if (intent.hasExtra("novaBiljka")) {
-            val novaBiljka = intent.getParcelableExtra<Biljka>("novaBiljka")
-            // ovdje treba dodati novaBiljka u listu biljkeList
-            biljkeLista = biljkeLista + novaBiljka!!
-
-            biljkePogled = findViewById(R.id.biljkeRV)
-            biljkeAdapter = BiljkaListAdapter(listOf(),modPrikaza, itemClickListener)
-            biljkePogled.adapter = biljkeAdapter
-
-            biljkeAdapter.updateBiljke(biljkeLista)
         }
     }
 }

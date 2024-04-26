@@ -1,6 +1,6 @@
 package ba.unsa.etf.rma.spirala1
 
-val biljke = listOf(
+val biljke = mutableListOf(
     Biljka(
         naziv = "Bosiljak (Ocimum basilicum)",
         porodica = "Lamiaceae (usnate)",

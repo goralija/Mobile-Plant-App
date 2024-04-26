@@ -152,6 +152,7 @@ class NovaBiljkaActivity : AppCompatActivity() {
                     selectedMedicinskaKorist, selectedProfilOkusa, jela, selectedKlimatskiTip,
                     selectedZemljisniTip)
 
+                biljke.add(novaBiljka)
                 val intent = Intent(this, MainActivity::class.java).putExtra("novaBiljka",
                     novaBiljka)
                 startActivity(intent)
