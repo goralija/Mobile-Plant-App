@@ -97,7 +97,7 @@ class NovaBiljkaActivity : AppCompatActivity() {
 
         dodajJeloBtn.setOnClickListener {
             val novoJelo = jeloET.text.toString().trim()
-            if (novoJelo.isNotEmpty()) {
+            if (novoJelo.isNotEmpty() && novoJelo.length <= 20 && novoJelo.length >= 2) {
                 if (dodajJeloBtn.text == "Izmijeni jelo") {
                     if (jelaList.any { it.equals(novoJelo, ignoreCase = true) }) {
                         jeloET.error =
@@ -122,6 +122,8 @@ class NovaBiljkaActivity : AppCompatActivity() {
                 updateJelaListView()
                 dodajJeloBtn.text = "Dodaj jelo"
             }
+            else if (novoJelo.length > 20 || novoJelo.length < 2) jeloET.error = "Jelo mora imati" +
+                    " između 2 i 20 znakova"
         }
 
         dodajBiljkuBtn.setOnClickListener {

@@ -1,5 +1,12 @@
 package ba.unsa.etf.rma.spirala1
 
+import android.app.Activity
+import android.app.Instrumentation
+import android.content.Intent
+import android.graphics.BitmapFactory
+import android.widget.Button
+import android.widget.ImageView
+import androidx.test.core.app.ActivityScenario
 import androidx.test.espresso.Espresso.onView
 import androidx.test.espresso.action.ViewActions.click
 import androidx.test.espresso.action.ViewActions.replaceText
@@ -13,6 +20,7 @@ import androidx.test.espresso.matcher.ViewMatchers.isNotChecked
 import androidx.test.espresso.matcher.ViewMatchers.withId
 import androidx.test.espresso.matcher.ViewMatchers.withText
 import androidx.test.ext.junit.rules.ActivityScenarioRule
+import junit.framework.TestCase.assertNotNull
 import org.hamcrest.CoreMatchers.not
 import org.junit.Rule
 import org.junit.Test
@@ -92,6 +100,7 @@ class NovaBiljkaActivityTests {
         onView(withId(R.id.dodajBiljkuBtn)).perform(scrollTo(), click())
         onView(withId(R.id.nazivET)).check(matches(hasErrorText("Naziv mora imati između 2 i 20 znakova")))
 
+        onView(withId(R.id.porodicaET)).perform(scrollTo(), click())
         onView(withId(R.id.porodicaET)).perform(scrollTo(), click(), typeText("a"))
         onView(withId(R.id.dodajBiljkuBtn)).perform(scrollTo(), click())
         onView(withId(R.id.porodicaET)).check(matches(hasErrorText("Porodica mora imati između 2 " +
@@ -106,6 +115,7 @@ class NovaBiljkaActivityTests {
                 "20 " +
                 "znakova")))
 
+        onView(withId(R.id.medicinskoUpozorenjeET)).perform(scrollTo(), click())
         onView(withId(R.id.medicinskoUpozorenjeET)).perform(scrollTo(), click(), typeText("a"))
         onView(withId(R.id.dodajBiljkuBtn)).perform(scrollTo(), click())
         onView(withId(R.id.medicinskoUpozorenjeET)).check(matches(hasErrorText("Upozorenje mora " +
@@ -116,6 +126,20 @@ class NovaBiljkaActivityTests {
             ("aadfsiughadsfbsitewuhiuxcbgbsd"))
         onView(withId(R.id.dodajBiljkuBtn)).perform(scrollTo(), click())
         onView(withId(R.id.medicinskoUpozorenjeET)).check(matches(hasErrorText("Upozorenje mora " +
+                "imati između 2 i 20 " +
+                "znakova")))
+
+        onView(withId(R.id.jeloET)).perform(scrollTo(), click())
+        onView(withId(R.id.jeloET)).perform(scrollTo(), click(), typeText("a"))
+        onView(withId(R.id.dodajJeloBtn)).perform(scrollTo(), click())
+        onView(withId(R.id.jeloET)).check(matches(hasErrorText("Jelo mora " +
+                "imati između 2 i 20 " +
+                "znakova")))
+
+        onView(withId(R.id.jeloET)).perform(scrollTo(), click(), typeText
+            ("aadfsiughadsfbsitewuhiuxcbgbsd"))
+        onView(withId(R.id.dodajJeloBtn)).perform(scrollTo(), click())
+        onView(withId(R.id.jeloET)).check(matches(hasErrorText("Jelo mora " +
                 "imati između 2 i 20 " +
                 "znakova")))
     }
@@ -246,6 +270,23 @@ class NovaBiljkaActivityTests {
         // dodali i da zato ne može da se pronađe dugme za dodavanje
     }
 
+    @Test
+    fun testPrikazaSlikeNakonKlikaNaUslikajBiljkuBtn() {
+        val dataIntent: Intent = Intent()
+        val resultIntent = Instrumentation.ActivityResult(Activity.RESULT_OK, dataIntent)
+        val scenario = ActivityScenario.launch(NovaBiljkaActivity::class.java)
 
-    //ovdje treba da se testira dodavanje slike
+        scenario.onActivity { activity -> activity.findViewById<Button>(R.id.uslikajBiljkuBtn).performClick() }
+
+        scenario.onActivity { activity ->
+            val bitmap = BitmapFactory.decodeResource(activity.resources, R.mipmap.ic_launcher)
+            val imageView = activity.findViewById(R.id.slikaIV) as ImageView
+            imageView.setImageBitmap(bitmap)
+        }
+
+        scenario.onActivity { activity ->
+            val imageView: ImageView = activity.findViewById(R.id.slikaIV)
+            assertNotNull(imageView.drawable) // Provjera je li ImageView postavljen s slikom
+        }
+    }
 }
