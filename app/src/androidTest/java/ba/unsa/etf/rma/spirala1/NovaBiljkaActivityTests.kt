@@ -286,7 +286,7 @@ class NovaBiljkaActivityTests {
 
         scenario.onActivity { activity ->
             val imageView: ImageView = activity.findViewById(R.id.slikaIV)
-            assertNotNull(imageView.drawable) // Provjera je li ImageView postavljen s slikom
+            assertNotNull(imageView.drawable)
         }
     }
 }
