@@ -8,6 +8,10 @@ import android.widget.ImageView
 import android.widget.TextView
 import androidx.core.content.ContextCompat.getString
 import androidx.recyclerview.widget.RecyclerView
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
 
 class BiljkaListAdapter(private var biljke: List<Biljka>, private var selectedMode: String,
                         private val itemClickListener: OnItemClickListener) :
@@ -39,8 +43,14 @@ class BiljkaListAdapter(private var biljke: List<Biljka>, private var selectedMo
         holder.profilOkusa?.text = biljke[position].profilOkusa.opis
         holder.zemljisniTip?.text = biljke[position].zemljisniTipovi[0].naziv
         val context: Context = holder.slika.context
-        var id: Int = context.resources.getIdentifier("cvijet","drawable", context.packageName)
-        holder.slika.setImageResource(id)
+        //var id: Int = context.resources.getIdentifier("cvijet","drawable", context.packageName)
+        //holder.slika.setImageResource(id)
+        CoroutineScope(Dispatchers.Main).launch {
+            val bitmap = withContext(Dispatchers.IO) {
+                TrefleDAO().getImage(biljke[position])
+            }
+            holder.slika.setImageBitmap(bitmap)
+        }
     }
     fun updateBiljke(biljke: List<Biljka>) {
         this.biljke = biljke
