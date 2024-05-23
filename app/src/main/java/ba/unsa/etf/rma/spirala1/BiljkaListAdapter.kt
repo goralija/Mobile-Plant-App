@@ -14,8 +14,10 @@ import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 
 class BiljkaListAdapter(private var biljke: List<Biljka>, private var selectedMode: String,
-                        private val itemClickListener: OnItemClickListener) :
+                        private val itemClickListener: OnItemClickListener, private val mainActivity: MainActivity) :
     RecyclerView.Adapter<BiljkaListAdapter.BiljkaViewHolder>() {
+
+    var clickablePlants: Boolean = true
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): BiljkaViewHolder {
         val viewId = when (selectedMode) {
@@ -31,20 +33,27 @@ class BiljkaListAdapter(private var biljke: List<Biljka>, private var selectedMo
     override fun getItemCount(): Int = biljke.size
     override fun onBindViewHolder(holder: BiljkaViewHolder, position: Int) {
         holder.ime.text = biljke[position].naziv
-        holder.upozorenje?.text = biljke[position].medicinskoUpozorenje
-        holder.korist1?.text = biljke[position].medicinskeKoristi[0].opis
+        holder.upozorenje?.text = biljke[position].medicinskoUpozorenje ?: ""
+        holder.korist1?.text = biljke[position].medicinskeKoristi.getOrNull(0)?.opis ?: ""
         holder.korist2?.text = biljke[position].medicinskeKoristi.getOrNull(1)?.opis ?: ""
         holder.korist3?.text = biljke[position].medicinskeKoristi.getOrNull(2)?.opis ?: ""
-        holder.jelo1?.text = biljke[position].jela[0]
-        holder.jelo2?.text = biljke[position].jela.getOrNull(1)?.toString() ?: ""
-        holder.jelo3?.text = biljke[position].jela.getOrNull(2)?.toString() ?: ""
-        holder.klimatskiTip?.text = biljke[position].klimatskiTipovi[0].opis
-        holder.porodica?.text = biljke[position].porodica
+        holder.jelo1?.text = biljke[position].jela.getOrNull(0) ?: ""
+        holder.jelo2?.text = biljke[position].jela.getOrNull(1) ?: ""
+        holder.jelo3?.text = biljke[position].jela.getOrNull(2) ?: ""
+        holder.klimatskiTip?.text = biljke[position].klimatskiTipovi.getOrNull(0)?.opis ?: ""
+        holder.porodica?.text = biljke[position].porodica ?: ""
         holder.profilOkusa?.text = biljke[position].profilOkusa.opis
-        holder.zemljisniTip?.text = biljke[position].zemljisniTipovi[0].naziv
+        holder.zemljisniTip?.text = biljke[position].zemljisniTipovi.getOrNull(0)?.naziv ?: ""
         val context: Context = holder.slika.context
         //var id: Int = context.resources.getIdentifier("cvijet","drawable", context.packageName)
         //holder.slika.setImageResource(id)
+
+
+        if (selectedMode == getString(context, R.string.botanic))
+            mainActivity.setBotanicMode(true)
+        else
+            mainActivity.setBotanicMode(false)
+
         CoroutineScope(Dispatchers.Main).launch {
             val bitmap = withContext(Dispatchers.IO) {
                 TrefleDAO().getImage(biljke[position])
@@ -52,8 +61,9 @@ class BiljkaListAdapter(private var biljke: List<Biljka>, private var selectedMo
             holder.slika.setImageBitmap(bitmap)
         }
     }
-    fun updateBiljke(biljke: List<Biljka>) {
+    fun updateBiljke(biljke: List<Biljka>, clickable: Boolean=true) {
         this.biljke = biljke
+        clickablePlants = clickable
         notifyDataSetChanged()
     }
 
@@ -79,10 +89,12 @@ class BiljkaListAdapter(private var biljke: List<Biljka>, private var selectedMo
         }
 
         override fun onClick(v: View) {
-            val position = adapterPosition
-            if (position != RecyclerView.NO_POSITION) {
-                val clickedItem = biljke[position]
-                itemClickListener.onItemClick(clickedItem)
+            if (clickablePlants) {
+                val position = adapterPosition
+                if (position != RecyclerView.NO_POSITION) {
+                    val clickedItem = biljke[position]
+                    itemClickListener.onItemClick(clickedItem)
+                }
             }
         }
     }

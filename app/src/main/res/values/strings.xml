@@ -4,4 +4,13 @@
     <string name="cook">Kuharski fokus</string>
     <string name="botanic">Botanički fokus</string>
     <string name="resetBtn">Reset</string>
+    <string-array name="colors_array">
+        <item>red</item>
+        <item>blue</item>
+        <item>yellow</item>
+        <item>orange</item>
+        <item>purple</item>
+        <item>brown</item>
+        <item>green</item>
+    </string-array>
 </resources>
