@@ -42,7 +42,7 @@ class BiljkaListAdapter(private var biljke: List<Biljka>, private var selectedMo
         holder.jelo3?.text = biljke[position].jela.getOrNull(2) ?: ""
         holder.klimatskiTip?.text = biljke[position].klimatskiTipovi.getOrNull(0)?.opis ?: ""
         holder.porodica?.text = biljke[position].porodica ?: ""
-        holder.profilOkusa?.text = biljke[position].profilOkusa.opis
+        holder.profilOkusa?.text = biljke[position].profilOkusa?.opis
         holder.zemljisniTip?.text = biljke[position].zemljisniTipovi.getOrNull(0)?.naziv ?: ""
         val context: Context = holder.slika.context
         //var id: Int = context.resources.getIdentifier("cvijet","drawable", context.packageName)

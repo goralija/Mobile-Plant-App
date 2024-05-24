@@ -75,9 +75,6 @@ class MainActivity : AppCompatActivity() {
         adapter.updateBiljke(plants, enableClicks)
     }
 
-
-
-
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         enableEdgeToEdge()

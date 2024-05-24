@@ -1,19 +1,19 @@
 package ba.unsa.etf.rma.spirala1
 
-import android.content.Context
 import android.graphics.Bitmap
 import android.graphics.BitmapFactory
+import android.util.Log
+import kotlinx.coroutines.Deferred
 import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.NonDisposableHandle.parent
+import kotlinx.coroutines.async
 import kotlinx.coroutines.withContext
 import org.json.JSONObject
-import java.io.InputStream
 import java.net.HttpURLConnection
 import java.net.URL
 
 class TrefleDAO {
     //Sve metode su suspend tipa unutar kojih se kreira corutine koja će izvršiti datu funkcionalnost
-    private var defaultBitmap: Bitmap = Bitmap.createBitmap(100, 100, Bitmap.Config.ARGB_8888).apply {
+    private var defaultBitmap = Bitmap.createBitmap(100, 100, Bitmap.Config.ARGB_8888).apply {
         eraseColor(android.graphics.Color.WHITE)
     }
 
@@ -48,22 +48,14 @@ class TrefleDAO {
         }
     }
 
-    /*
+
     suspend fun fixData(biljka: Biljka): Biljka = withContext(Dispatchers.IO) {
-        // korištenjem web servisa na osnovu latinskog naziva biljke pronalazi potrebne podatke i zatim popunjava nepotpuna/netačna polja u okviru proslijeđene biljke
-        // kao rezultat se vraća biljka sa ispravnim podacima
-        // Ako web servis vrati vrijednost nekog atributa null onda taj dio provjere ne radimo
-        // podatke koje je potrebno provjeriti putem web servisa su:
-        // -	Porodica biljke - treba odgovarati atributu family.name, ako ne odgovara u biljki koju ćete vratiti upišite vrijednost sa web servisa
-        // -    Jela - biljke koje imaju atribut edible false ne smiju imati jela i unutar medicinskog upozorenja treba biti podstring “NIJE JESTIVO” i lista jela treba biti prazna
-        // -    Medicinsko upozorenje - biljke koje imaju atribut main_species.specifications.toxicity različit od “none” trebaju unutar medicinskog upozorenja imati podstring “TOKSIČNO”, ako medicinsko upozorenje ne sadrži podstring “TOKSIČNO” na kraj stringa dodajte “ TOKSIČNO” u rezultujućoj biljci.
-        // -    Zemljište - u zavisnosti od parametra main_species.specifications.growth.soil_texture. Ako neki odabrani tip zemljišta ne ispunjava sljedeće uslove obrišite ga u rezultujućoj biljici ili dodajte ako nije dodan tip koji ispunjava uslov.
-        //          tip zemljišta (soil_texture) -> SLJUNOVITO (9), KRECNJACKO (10), GLINENO (1-2), PJESKOVITO (3-4), ILOVACA (5-6), CRNICA (7-8)
-        // -    Klimatski tip - u zavisnosti od parametara light i atmospheric_humidity. Slično kao za tip zemljišta i ovdje dodajte odgovarajući tip ili obrišite tip koji ne zadovoljava uslove i to upišite u rezultujuću biljku.
-        //          tip klime (light, atmospheric_humidity) -> SREDOZEMNA (6-9, 1-5), TROPSKA (8-10, 7-10), SUBTROPSKA (6-9, 5-8), UMJERENA (4-7, 3-7), SUHA (7-9, 1-2), PLANINSKA (0-5, 3-7)
+
+        var plantId: String? = null
+
         try {
-            val latinName = biljka.naziv
-            val urlString = "https://trefle.io/api/v1/plants/search?q=$latinName&token=YOUR_API_TOKEN"
+            var latinName = biljka.naziv?.let { getLatinName(it) }
+            val urlString = "https://trefle.io/api/v1/plants/search?q=$latinName&token=THshD1EMlApPzeiN2RDOxz_c6E8Cu1iPRFjsK-mTJF0"
             val url = URL(urlString)
             val connection = url.openConnection() as HttpURLConnection
             connection.requestMethod = "GET"
@@ -71,52 +63,94 @@ class TrefleDAO {
             if (connection.responseCode == HttpURLConnection.HTTP_OK) {
                 val response = connection.inputStream.bufferedReader().use { it.readText() }
                 val json = JSONObject(response)
-                val plantData = json.getJSONArray("data").getJSONObject(0)
+                val dataArray = json.getJSONArray("data")
+                if (dataArray.length() > 0) {
+                    plantId = dataArray.getJSONObject(0).getString("id")
+                }
+            }
+        } catch (e: Exception) {
+            e.printStackTrace()
+        }
 
-                // Update family name
+        if (plantId == null) return@withContext biljka
+
+        try {
+            val urlString = "https://trefle.io/api/v1/plants/$plantId?token=THshD1EMlApPzeiN2RDOxz_c6E8Cu1iPRFjsK-mTJF0"
+            val url = URL(urlString)
+            val connection = url.openConnection() as HttpURLConnection
+            connection.requestMethod = "GET"
+
+            if (connection.responseCode == HttpURLConnection.HTTP_OK) {
+                val response = connection.inputStream.bufferedReader().use { it.readText() }
+                val json = JSONObject(response)
+                val plantData = json.getJSONObject("data")
+
+                // ako ne odgovara nasa 'porodica' atributu family.name -> mijenjamo
                 val familyName = plantData.getJSONObject("family").getString("name")
                 if (biljka.porodica != familyName) {
                     biljka.porodica = familyName
                 }
 
-                // Update edible status and meals
-                val isEdible = plantData.getBoolean("edible")
+                // za !edible biljke isprazni se lista jela i dodaje se medic.upoz.
+                val isEdible = plantData.getJSONObject("main_species").getBoolean("edible")
                 if (!isEdible) {
-                    biljka.jela = listOf()
-                    if (!biljka.medicinskoUpozorenje?.contains("NIJE JESTIVO")) {
-                        biljka.medicinskoUpozorenje += " NIJE JESTIVO"
+                    biljka.jela = mutableListOf()
+                    if (biljka.medicinskoUpozorenje?.contains("NIJE JESTIVO") != true) {
+                        biljka.medicinskoUpozorenje = (biljka.medicinskoUpozorenje ?: "") + " NIJE JESTIVO"
                     }
                 }
 
-                // Update medicinal warning
+                // main_species.specifications.toxicity != none -> if(! ...TOKSIČNO...) ...TOKSIČNO
                 val toxicity = plantData.getJSONObject("main_species").getJSONObject("specifications").getString("toxicity")
-                if (toxicity != "none" && !biljka.medicinskoUpozorenje?.contains("TOKSIČNO")) {
+                if (toxicity != "none" && biljka.medicinskoUpozorenje?.contains("TOKSIČNO") != true) {
                     biljka.medicinskoUpozorenje += " TOKSIČNO"
                 }
 
-                // Update soil texture
-                val soilTexture = plantData.getJSONObject("main_species").getJSONObject("specifications").getJSONArray("growth").getString("soil_texture")
-                val validSoils = listOf("SLJUNOVITO", "KRECNJACKO", "GLINENO", "PJESKOVITO", "ILOVACA", "CRNICA")
+                val soilTextureMapping = mapOf(
+                    1 to Zemljište.GLINENO,
+                    2 to Zemljište.GLINENO,
+                    3 to Zemljište.PJESKOVITO,
+                    4 to Zemljište.PJESKOVITO,
+                    5 to Zemljište.ILOVACA,
+                    6 to Zemljište.ILOVACA,
+                    7 to Zemljište.CRNICA,
+                    8 to Zemljište.CRNICA,
+                    9 to Zemljište.SLJUNKOVITO,
+                    10 to Zemljište.KRECNJACKO
+                )
+
+                // main_species.specifications.growth.soil_texture
+                val soilTextureInt = plantData.getJSONObject("main_species").getJSONObject("growth").getInt("soil_texture")
+
+                Log.v("soil_texture -----------------> ", soilTextureInt.toString())
+
+                val soilTexture = soilTextureMapping[soilTextureInt]
+                val validSoils = listOf(Zemljište.SLJUNKOVITO, Zemljište.KRECNJACKO, Zemljište.GLINENO, Zemljište.PJESKOVITO, Zemljište.ILOVACA, Zemljište.CRNICA)
                 biljka.zemljisniTipovi = biljka.zemljisniTipovi.filter { validSoils.contains(it) }.toMutableList()
-                if (!biljka.zemljisniTipovi.contains(soilTexture)) {
-                    biljka.zemljisniTipovi.add(soilTexture)
+                if (soilTexture != null && !biljka.zemljisniTipovi.contains(soilTexture)) {
+                    (biljka.zemljisniTipovi as MutableList<Zemljište>).add(soilTexture)
                 }
 
-                // Update climate types
-                val light = plantData.getJSONObject("main_species").getJSONObject("specifications").getInt("light")
-                val humidity = plantData.getJSONObject("main_species").getJSONObject("specifications").getInt("atmospheric_humidity")
                 val validClimates = mapOf(
-                    "SREDOZEMNA" to (6..9 to 1..5),
-                    "TROPSKA" to (8..10 to 7..10),
-                    "SUBTROPSKA" to (6..9 to 5..8),
-                    "UMJERENA" to (4..7 to 3..7),
-                    "SUHA" to (7..9 to 1..2),
-                    "PLANINSKA" to (0..5 to 3..7)
+                    KlimatskiTip.SREDOZEMNA to (6..9 to 1..5),
+                    KlimatskiTip.TROPSKA to (8..10 to 7..10),
+                    KlimatskiTip.SUBTROPSKA to (6..9 to 5..8),
+                    KlimatskiTip.UMJERENA to (4..7 to 3..7),
+                    KlimatskiTip.SUHA to (7..9 to 1..2),
+                    KlimatskiTip.PLANINSKA to (0..5 to 3..7)
                 )
+
+                val light = plantData.getJSONObject("main_species").getJSONObject("growth").getInt("light")
+                val humidity = plantData.getJSONObject("main_species").getJSONObject("growth").getInt("atmospheric_humidity")
+
+                Log.v("light -----------------> ", light.toString())
+                Log.v("humidity -----------------> ", humidity.toString())
 
                 biljka.klimatskiTipovi = biljka.klimatskiTipovi.filter {
                     validClimates[it]?.first?.contains(light) == true && validClimates[it]?.second?.contains(humidity) == true
                 }.toMutableList()
+
+                biljka.klimatskiTipovi.add(KlimatskiTip.SREDOZEMNA)
 
                 return@withContext biljka
             } else {
@@ -128,14 +162,9 @@ class TrefleDAO {
         }
     }
 
-     */
-
     suspend fun getPlantsWithFlowerColor(flower_color: String, substr: String): List<Biljka> = withContext(Dispatchers.IO) {
-        // vraća listu biljaka koje imaju boju cvijeta flower_color i sadrže podstring substr
-        // Sve atribute biljaka koje ne možete dobiti sa web servisa ili koji su null postavite na null ili na prazan string
         try {
-            val urlString =
-                "https://trefle.io/api/v1/plants?filter[flower_color]=$flower_color&token=THshD1EMlApPzeiN2RDOxz_c6E8Cu1iPRFjsK-mTJF0"
+            val urlString = "https://trefle.io/api/v1/plants?filter[flower_color]=$flower_color&token=THshD1EMlApPzeiN2RDOxz_c6E8Cu1iPRFjsK-mTJF0"
             val url = URL(urlString)
             val connection = url.openConnection() as HttpURLConnection
             connection.requestMethod = "GET"
@@ -146,37 +175,38 @@ class TrefleDAO {
                 val plants = json.getJSONArray("data")
                 val filteredPlants = mutableListOf<Biljka>()
 
+                // List of deferred results
+                val deferredResults = mutableListOf<Deferred<Biljka>>()
+
                 for (i in 0 until plants.length()) {
                     val plant = plants.getJSONObject(i)
-                    val plantName = plant.getString("common_name")
+                    val plantName = plant.getString("common_name") + " (" + plant.getString("scientific_name") + ")"
                     if (plantName.contains(substr, true)) {
-                        val naziv = plant.optString("common_name", null)
-                        val porodica = plant.optJSONObject("family")?.optString("name", null)
-                        val medicinskoUpozorenje = plant.optString("medicinal", null)
-                        val medicinskeKoristi =
-                            listOf<MedicinskaKorist>()  // Assuming this needs to be filled with actual data if available
-                        val profilOkusa = ProfilOkusaBiljke.MENTA  // Assuming a default value
-                        val jela =
-                            listOf<String>()  // Assuming this needs to be filled with actual data if available
-                        val klimatskiTipovi =
-                            listOf<KlimatskiTip>()  // Assuming this needs to be filled with actual data if available
-                        val zemljisniTipovi =
-                            listOf<Zemljište>()  // Assuming this needs to be filled with actual data if available
+                        val naziv = plant.optString("common_name", null) + " (" + plant.optString("scientific_name", null) + ")"
 
                         val biljka = Biljka(
                             naziv = naziv,
-                            porodica = porodica,
-                            medicinskoUpozorenje = medicinskoUpozorenje,
-                            medicinskeKoristi = medicinskeKoristi,
-                            profilOkusa = profilOkusa,
-                            jela = jela,
-                            klimatskiTipovi = klimatskiTipovi,
-                            zemljisniTipovi = zemljisniTipovi
+                            porodica = null,
+                            medicinskoUpozorenje = null,
+                            medicinskeKoristi = mutableListOf(),
+                            profilOkusa = null,
+                            jela = mutableListOf(),
+                            klimatskiTipovi = mutableListOf(),
+                            zemljisniTipovi = mutableListOf()
                         )
 
-                        filteredPlants.add(biljka)
+                        // Add async task to list of deferred results
+                        val deferred = async { TrefleDAO().fixData(biljka) }
+                        deferredResults.add(deferred)
                     }
                 }
+
+                // Await all deferred results
+                for (deferred in deferredResults) {
+                    val fixedBiljka = deferred.await()
+                    filteredPlants.add(fixedBiljka)
+                }
+
                 return@withContext filteredPlants
             } else {
                 return@withContext emptyList<Biljka>()

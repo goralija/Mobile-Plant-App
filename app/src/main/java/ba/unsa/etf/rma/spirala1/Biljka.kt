@@ -5,23 +5,23 @@ import android.os.Parcelable
 
 data class Biljka(
     val naziv: String?,
-    val porodica: String?,
-    val medicinskoUpozorenje: String?,
-    val medicinskeKoristi: List<MedicinskaKorist>,
-    val profilOkusa: ProfilOkusaBiljke,
-    val jela: List<String>,
-    val klimatskiTipovi: List<KlimatskiTip>,
-    val zemljisniTipovi: List<Zemljište>,
+    var porodica: String?,
+    var medicinskoUpozorenje: String?,
+    val medicinskeKoristi: MutableList<MedicinskaKorist>,
+    val profilOkusa: ProfilOkusaBiljke?,
+    var jela: MutableList<String>,
+    var klimatskiTipovi: MutableList<KlimatskiTip>,
+    var zemljisniTipovi: MutableList<Zemljište>,
 ) : Parcelable {
     constructor(parcel: Parcel) : this(
         parcel.readString(),
         parcel.readString(),
         parcel.readString(),
-        parcel.createStringArrayList()?.map { MedicinskaKorist.valueOf(it) } ?: emptyList(),
-        parcel.readSerializable() as ProfilOkusaBiljke,
-        parcel.createStringArrayList() ?: emptyList(),
-        parcel.createStringArrayList()?.map { KlimatskiTip.valueOf(it) } ?: emptyList(),
-        parcel.createStringArrayList()?.map { Zemljište.valueOf(it) } ?: emptyList()
+        parcel.createStringArrayList()?.map { MedicinskaKorist.valueOf(it) }?.toMutableList() ?: mutableListOf(),
+        parcel.readSerializable() as? ProfilOkusaBiljke,
+        parcel.createStringArrayList()?.toMutableList() ?: mutableListOf(),
+        parcel.createStringArrayList()?.map { KlimatskiTip.valueOf(it) }?.toMutableList() ?: mutableListOf(),
+        parcel.createStringArrayList()?.map { Zemljište.valueOf(it) }?.toMutableList() ?: mutableListOf()
     )
 
     override fun describeContents(): Int {

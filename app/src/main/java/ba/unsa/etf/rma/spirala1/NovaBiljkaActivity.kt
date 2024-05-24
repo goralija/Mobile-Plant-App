@@ -5,6 +5,7 @@ import android.content.Intent
 import android.graphics.Bitmap
 import android.os.Bundle
 import android.provider.MediaStore
+import android.util.Log
 import android.widget.ArrayAdapter
 import android.widget.EditText
 import android.widget.ImageView
@@ -12,6 +13,10 @@ import android.widget.ListView
 import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
 import com.google.android.material.button.MaterialButton
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
 
 class NovaBiljkaActivity : AppCompatActivity() {
 
@@ -149,16 +154,25 @@ class NovaBiljkaActivity : AppCompatActivity() {
                         selectedZemljisniTip.add(Zemljište.values()[i])
                 }
                 val selectedProfilOkusa = ProfilOkusaBiljke.values()[profilOkusaLV.checkedItemPosition]
-                var jela = jelaList.toList()
+                var jela = jelaList.toMutableList()
                 val novaBiljka = Biljka(naziv, porodica, medicinskoUpozorenje,
                     selectedMedicinskaKorist, selectedProfilOkusa, jela, selectedKlimatskiTip,
                     selectedZemljisniTip)
 
-                biljke.add(novaBiljka)
-                val intent = Intent(this, MainActivity::class.java).putExtra("novaBiljka",
-                    novaBiljka)
-                startActivity(intent)
-                finish()
+                Log.v("biljkaaaa1-------",novaBiljka.toString())
+
+                CoroutineScope(Dispatchers.Main).launch {
+                    val fixedBiljka = withContext(Dispatchers.IO) {
+                        TrefleDAO().fixData(novaBiljka)
+                    }
+
+                    Log.v("biljkaaaa2-------",fixedBiljka.toString())
+
+                    biljke.add(fixedBiljka)
+                    val intent = Intent(this@NovaBiljkaActivity, MainActivity::class.java).putExtra("novaBiljka", fixedBiljka)
+                    startActivity(intent)
+                    finish()
+                }
             }
         }
 
