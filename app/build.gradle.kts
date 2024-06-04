@@ -36,6 +36,10 @@ android {
     buildFeatures {
         viewBinding = true
     }
+
+    testOptions {
+        unitTests.isReturnDefaultValues = true
+    }
 }
 
 dependencies {
@@ -53,4 +57,9 @@ dependencies {
     androidTestImplementation(libs.androidx.junit)
     androidTestImplementation(libs.androidx.espresso.core)
     androidTestImplementation("androidx.test.espresso:espresso-contrib:3.5.1")
+    testImplementation ("org.assertj:assertj-core:3.22.0")
+    testImplementation ("io.mockk:mockk:1.12.3")
+    testImplementation ("org.mockito:mockito-core:3.9.0")
+    testImplementation ("org.mockito:mockito-inline:3.9.0")
+    testImplementation("org.jetbrains.kotlinx:kotlinx-coroutines-test:1.5.2")
 }

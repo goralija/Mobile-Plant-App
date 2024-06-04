@@ -1,10 +1,13 @@
 package ba.unsa.etf.rma.spirala1
 
+import android.content.Context
+import android.content.res.Resources
 import android.graphics.Bitmap
 import android.graphics.BitmapFactory
 import android.util.Log
 import kotlinx.coroutines.Deferred
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.NonDisposableHandle.parent
 import kotlinx.coroutines.async
 import kotlinx.coroutines.withContext
 import org.json.JSONObject
@@ -12,9 +15,11 @@ import java.net.HttpURLConnection
 import java.net.URL
 
 class TrefleDAO {
-    //Sve metode su suspend tipa unutar kojih se kreira corutine koja će izvršiti datu funkcionalnost
-    private var defaultBitmap = Bitmap.createBitmap(100, 100, Bitmap.Config.ARGB_8888).apply {
-        eraseColor(android.graphics.Color.WHITE)
+    private lateinit var defaultBitmap : Bitmap
+    fun init(context: Context) {
+        if (!this::defaultBitmap.isInitialized) {
+            defaultBitmap = BitmapFactory.decodeResource(context.resources, R.mipmap.ic_launcher)
+        }
     }
 
     fun getLatinName(naziv: String): String? {
@@ -24,8 +29,6 @@ class TrefleDAO {
     }
 
     suspend fun getImage(biljka: Biljka): Bitmap = withContext(Dispatchers.IO) {
-        // vraća bitmap slike biljke koja je proslijeđena
-        // potrebno je prikazati prvu sliku koja se pronađe korištenjem pretrage trefle web servisa po latinskom nazivu biljke
         try {
             val latinName = getLatinName(biljka.naziv.toString())
             val urlString = "https://trefle.io/api/v1/plants/search?q=$latinName&token=THshD1EMlApPzeiN2RDOxz_c6E8Cu1iPRFjsK-mTJF0"
@@ -54,7 +57,7 @@ class TrefleDAO {
         var plantId: String? = null
 
         try {
-            var latinName = biljka.naziv?.let { getLatinName(it) }
+            var latinName = biljka.naziv.let { getLatinName(it) }
             val urlString = "https://trefle.io/api/v1/plants/search?q=$latinName&token=THshD1EMlApPzeiN2RDOxz_c6E8Cu1iPRFjsK-mTJF0"
             val url = URL(urlString)
             val connection = url.openConnection() as HttpURLConnection
@@ -85,11 +88,13 @@ class TrefleDAO {
                 val json = JSONObject(response)
                 val plantData = json.getJSONObject("data")
 
+                biljka.naziv = plantData.getString("scientific_name")
+
                 // ako ne odgovara nasa 'porodica' atributu family.name -> mijenjamo
                 val familyName = plantData.getJSONObject("family").getString("name")
-                if (biljka.porodica != familyName) {
-                    biljka.porodica = familyName
-                }
+                biljka.porodica = familyName
+
+                Log.v("Porodica",biljka.porodica)
 
                 // za !edible biljke isprazni se lista jela i dodaje se medic.upoz.
                 val isEdible = plantData.getJSONObject("main_species").getBoolean("edible")
@@ -107,22 +112,22 @@ class TrefleDAO {
                 }
 
                 val soilTextureMapping = mapOf(
-                    1 to Zemljište.GLINENO,
-                    2 to Zemljište.GLINENO,
-                    3 to Zemljište.PJESKOVITO,
-                    4 to Zemljište.PJESKOVITO,
-                    5 to Zemljište.ILOVACA,
-                    6 to Zemljište.ILOVACA,
-                    7 to Zemljište.CRNICA,
-                    8 to Zemljište.CRNICA,
-                    9 to Zemljište.SLJUNKOVITO,
-                    10 to Zemljište.KRECNJACKO
+                    "1" to Zemljište.GLINENO,
+                    "2" to Zemljište.GLINENO,
+                    "3" to Zemljište.PJESKOVITO,
+                    "4" to Zemljište.PJESKOVITO,
+                    "5" to Zemljište.ILOVACA,
+                    "6" to Zemljište.ILOVACA,
+                    "7" to Zemljište.CRNICA,
+                    "8" to Zemljište.CRNICA,
+                    "9" to Zemljište.SLJUNKOVITO,
+                    "10" to Zemljište.KRECNJACKO
                 )
 
                 // main_species.specifications.growth.soil_texture
-                val soilTextureInt = plantData.getJSONObject("main_species").getJSONObject("growth").getInt("soil_texture")
+                val soilTextureInt = plantData.getJSONObject("main_species").getJSONObject("growth").getString("soil_texture")
 
-                Log.v("soil_texture -----------------> ", soilTextureInt.toString())
+                Log.v("soil_texture----> ", soilTextureInt)
 
                 val soilTexture = soilTextureMapping[soilTextureInt]
                 val validSoils = listOf(Zemljište.SLJUNKOVITO, Zemljište.KRECNJACKO, Zemljište.GLINENO, Zemljište.PJESKOVITO, Zemljište.ILOVACA, Zemljište.CRNICA)
@@ -140,17 +145,28 @@ class TrefleDAO {
                     KlimatskiTip.PLANINSKA to (0..5 to 3..7)
                 )
 
-                val light = plantData.getJSONObject("main_species").getJSONObject("growth").getInt("light")
-                val humidity = plantData.getJSONObject("main_species").getJSONObject("growth").getInt("atmospheric_humidity")
+                val light = plantData.getJSONObject("main_species").getJSONObject("growth").getString("light")
+                val humidity = plantData.getJSONObject("main_species").getJSONObject("growth").getString("atmospheric_humidity")
 
-                Log.v("light -----------------> ", light.toString())
-                Log.v("humidity -----------------> ", humidity.toString())
+                Log.v("light--> ", light.toString())
+                Log.v("humidity----> ", humidity.toString())
 
-                biljka.klimatskiTipovi = biljka.klimatskiTipovi.filter {
-                    validClimates[it]?.first?.contains(light) == true && validClimates[it]?.second?.contains(humidity) == true
-                }.toMutableList()
+                if (light != "null" && humidity != "null") {
+                    biljka.klimatskiTipovi = mutableListOf(
+                        KlimatskiTip.SUHA,
+                        KlimatskiTip.SREDOZEMNA,
+                        KlimatskiTip.SUBTROPSKA,
+                        KlimatskiTip.TROPSKA,
+                        KlimatskiTip.UMJERENA,
+                        KlimatskiTip.PLANINSKA
+                    )
 
-                biljka.klimatskiTipovi.add(KlimatskiTip.SREDOZEMNA)
+                    biljka.klimatskiTipovi = biljka.klimatskiTipovi.filter {
+                        validClimates[it]?.first?.contains(light.toInt()) == true && validClimates[it]?.second?.contains(
+                            humidity.toInt()
+                        ) == true
+                    }.toMutableList()
+                }
 
                 return@withContext biljka
             } else {
@@ -182,11 +198,11 @@ class TrefleDAO {
                     val plant = plants.getJSONObject(i)
                     val plantName = plant.getString("common_name") + " (" + plant.getString("scientific_name") + ")"
                     if (plantName.contains(substr, true)) {
-                        val naziv = plant.optString("common_name", null) + " (" + plant.optString("scientific_name", null) + ")"
+                        val naziv = plant.optString("common_name", "") + " (" + plant.optString("scientific_name", "") + ")"
 
-                        val biljka = Biljka(
+                        var biljka = Biljka(
                             naziv = naziv,
-                            porodica = null,
+                            porodica = "",
                             medicinskoUpozorenje = null,
                             medicinskeKoristi = mutableListOf(),
                             profilOkusa = null,

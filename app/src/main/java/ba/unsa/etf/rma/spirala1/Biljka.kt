@@ -4,18 +4,18 @@ import android.os.Parcel
 import android.os.Parcelable
 
 data class Biljka(
-    val naziv: String?,
-    var porodica: String?,
+    var naziv: String,
+    var porodica: String,
     var medicinskoUpozorenje: String?,
-    val medicinskeKoristi: MutableList<MedicinskaKorist>,
+    val medicinskeKoristi: List<MedicinskaKorist>,
     val profilOkusa: ProfilOkusaBiljke?,
-    var jela: MutableList<String>,
-    var klimatskiTipovi: MutableList<KlimatskiTip>,
-    var zemljisniTipovi: MutableList<Zemljište>,
+    var jela: List<String>,
+    var klimatskiTipovi: List<KlimatskiTip>,
+    var zemljisniTipovi: List<Zemljište>,
 ) : Parcelable {
     constructor(parcel: Parcel) : this(
-        parcel.readString(),
-        parcel.readString(),
+        parcel.readString().toString(),
+        parcel.readString().toString(),
         parcel.readString(),
         parcel.createStringArrayList()?.map { MedicinskaKorist.valueOf(it) }?.toMutableList() ?: mutableListOf(),
         parcel.readSerializable() as? ProfilOkusaBiljke,

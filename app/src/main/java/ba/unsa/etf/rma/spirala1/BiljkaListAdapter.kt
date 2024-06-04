@@ -40,7 +40,7 @@ class BiljkaListAdapter(private var biljke: List<Biljka>, private var selectedMo
         holder.jelo1?.text = biljke[position].jela.getOrNull(0) ?: ""
         holder.jelo2?.text = biljke[position].jela.getOrNull(1) ?: ""
         holder.jelo3?.text = biljke[position].jela.getOrNull(2) ?: ""
-        holder.klimatskiTip?.text = biljke[position].klimatskiTipovi.getOrNull(0)?.opis ?: ""
+        holder.klimatskiTip?.text = biljke[position].klimatskiTipovi?.getOrNull(0)?.opis ?: ""
         holder.porodica?.text = biljke[position].porodica ?: ""
         holder.profilOkusa?.text = biljke[position].profilOkusa?.opis
         holder.zemljisniTip?.text = biljke[position].zemljisniTipovi.getOrNull(0)?.naziv ?: ""
