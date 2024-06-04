@@ -5,13 +5,18 @@ import android.content.res.Resources
 import android.graphics.Bitmap
 import android.graphics.BitmapFactory
 import android.util.Log
+import com.google.gson.JsonNull
+import com.google.gson.JsonParseException
+import com.google.gson.JsonParser
 import kotlinx.coroutines.Deferred
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.NonDisposableHandle.parent
 import kotlinx.coroutines.async
 import kotlinx.coroutines.withContext
 import org.json.JSONObject
+import java.io.IOException
 import java.net.HttpURLConnection
+import java.net.MalformedURLException
 import java.net.URL
 
 class TrefleDAO {
@@ -22,15 +27,19 @@ class TrefleDAO {
         }
     }
 
-    fun getLatinName(naziv: String): String? {
-        val regex = Regex("\\(([^)]+)\\)")
+    fun dajLatinski(naziv: String): String {
+        val regex = "\\((.*?)\\)".toRegex()
         val matchResult = regex.find(naziv)
-        return matchResult?.groups?.get(1)?.value
+        return if (matchResult != null) {
+            matchResult.groupValues[1].split("\\s+".toRegex()).joinToString("+")
+        } else {
+            ""
+        }
     }
 
     suspend fun getImage(biljka: Biljka): Bitmap = withContext(Dispatchers.IO) {
         try {
-            val latinName = getLatinName(biljka.naziv.toString())
+            val latinName = dajLatinski(biljka.naziv.toString())
             val urlString = "https://trefle.io/api/v1/plants/search?q=$latinName&token=THshD1EMlApPzeiN2RDOxz_c6E8Cu1iPRFjsK-mTJF0"
             val url = URL(urlString)
             val connection = url.openConnection() as HttpURLConnection
@@ -51,133 +60,85 @@ class TrefleDAO {
         }
     }
 
-
-    suspend fun fixData(biljka: Biljka): Biljka = withContext(Dispatchers.IO) {
-
-        var plantId: String? = null
-
+suspend fun fixData(biljka: Biljka): Biljka {
+    return withContext(Dispatchers.IO) {
         try {
-            var latinName = biljka.naziv.let { getLatinName(it) }
-            val urlString = "https://trefle.io/api/v1/plants/search?q=$latinName&token=THshD1EMlApPzeiN2RDOxz_c6E8Cu1iPRFjsK-mTJF0"
-            val url = URL(urlString)
-            val connection = url.openConnection() as HttpURLConnection
-            connection.requestMethod = "GET"
+            val latinski = dajLatinski(biljka.naziv.toString())
+            val urll = "https://trefle.io/api/v1/plants/search?q=$latinski&token=THshD1EMlApPzeiN2RDOxz_c6E8Cu1iPRFjsK-mTJF0"
+            val url = URL(urll)
+            var id: Int = 0
 
-            if (connection.responseCode == HttpURLConnection.HTTP_OK) {
-                val response = connection.inputStream.bufferedReader().use { it.readText() }
-                val json = JSONObject(response)
-                val dataArray = json.getJSONArray("data")
-                if (dataArray.length() > 0) {
-                    plantId = dataArray.getJSONObject(0).getString("id")
+            (url.openConnection() as? HttpURLConnection)?.run {
+                val result = this.inputStream.bufferedReader().use { it.readText() }
+                val jsonArray = JsonParser.parseString(result).asJsonObject.getAsJsonArray("data")
+                if (jsonArray.size() > 0) {
+                    id = jsonArray[0].asJsonObject.get("id").asInt
+                } else {
+                    throw Exception("No data found for the given plant name.")
                 }
-            }
-        } catch (e: Exception) {
-            e.printStackTrace()
-        }
+            } ?: throw Exception("Failed to open connection")
 
-        if (plantId == null) return@withContext biljka
+            val urlll = URL("https://trefle.io/api/v1/plants/$id?token=THshD1EMlApPzeiN2RDOxz_c6E8Cu1iPRFjsK-mTJF0")
+            var nova: Biljka = biljka
 
-        try {
-            val urlString = "https://trefle.io/api/v1/plants/$plantId?token=THshD1EMlApPzeiN2RDOxz_c6E8Cu1iPRFjsK-mTJF0"
-            val url = URL(urlString)
-            val connection = url.openConnection() as HttpURLConnection
-            connection.requestMethod = "GET"
+            (urlll.openConnection() as? HttpURLConnection)?.run {
+                val response = this.inputStream.bufferedReader().use { it.readText() }
+                val jsonObject = JsonParser.parseString(response).asJsonObject.getAsJsonObject("data")
 
-            if (connection.responseCode == HttpURLConnection.HTTP_OK) {
-                val response = connection.inputStream.bufferedReader().use { it.readText() }
-                val json = JSONObject(response)
-                val plantData = json.getJSONObject("data")
+                val familyName = jsonObject.getAsJsonObject("main_species").get("family")?.takeIf { it != JsonNull.INSTANCE }?.asString ?: biljka.porodica
 
-                biljka.naziv = plantData.getString("scientific_name")
+                val isEdible = jsonObject.getAsJsonObject("main_species").get("edible")?.takeIf { it != JsonNull.INSTANCE }?.asBoolean ?: false
 
-                // ako ne odgovara nasa 'porodica' atributu family.name -> mijenjamo
-                val familyName = plantData.getJSONObject("family").getString("name")
-                biljka.porodica = familyName
+                val toxicity = jsonObject.getAsJsonObject("main_species").getAsJsonObject("specifications").get("toxicity")?.takeIf { it != JsonNull.INSTANCE }?.asString ?: "none"
 
-                Log.v("Porodica",biljka.porodica)
+                val novoMedUpozorenje = StringBuilder(biljka.medicinskoUpozorenje ?: "").apply {
+                    if (!isEdible) append(" NIJE JESTIVO")
+                    if (toxicity != "none" && !contains("TOKSIČNO")) append(" TOKSIČNO")
+                }.toString()
 
-                // za !edible biljke isprazni se lista jela i dodaje se medic.upoz.
-                val isEdible = plantData.getJSONObject("main_species").getBoolean("edible")
-                if (!isEdible) {
-                    biljka.jela = mutableListOf()
-                    if (biljka.medicinskoUpozorenje?.contains("NIJE JESTIVO") != true) {
-                        biljka.medicinskoUpozorenje = (biljka.medicinskoUpozorenje ?: "") + " NIJE JESTIVO"
-                    }
-                }
+                val soilTexture1 = jsonObject.getAsJsonObject("main_species").getAsJsonObject("growth").get("soil_texture")?.takeIf { it != JsonNull.INSTANCE }?.asString ?: ""
+                var noviZemljisniTipovi = mutableListOf<Zemljište>()
 
-                // main_species.specifications.toxicity != none -> if(! ...TOKSIČNO...) ...TOKSIČNO
-                val toxicity = plantData.getJSONObject("main_species").getJSONObject("specifications").getString("toxicity")
-                if (toxicity != "none" && biljka.medicinskoUpozorenje?.contains("TOKSIČNO") != true) {
-                    biljka.medicinskoUpozorenje += " TOKSIČNO"
-                }
 
-                val soilTextureMapping = mapOf(
-                    "1" to Zemljište.GLINENO,
-                    "2" to Zemljište.GLINENO,
-                    "3" to Zemljište.PJESKOVITO,
-                    "4" to Zemljište.PJESKOVITO,
-                    "5" to Zemljište.ILOVACA,
-                    "6" to Zemljište.ILOVACA,
-                    "7" to Zemljište.CRNICA,
-                    "8" to Zemljište.CRNICA,
-                    "9" to Zemljište.SLJUNKOVITO,
-                    "10" to Zemljište.KRECNJACKO
+                if(soilTexture1=="9") noviZemljisniTipovi.add(Zemljište.SLJUNKOVITO)
+                if(soilTexture1=="10") noviZemljisniTipovi.add(Zemljište.KRECNJACKO)
+                if(soilTexture1=="1" || soilTexture1=="2") noviZemljisniTipovi.add(Zemljište.GLINENO)
+                if(soilTexture1=="3" || soilTexture1=="4") noviZemljisniTipovi.add(Zemljište.PJESKOVITO)
+                if(soilTexture1=="5" || soilTexture1=="6") noviZemljisniTipovi.add(Zemljište.ILOVACA)
+                if(soilTexture1=="7" || soilTexture1=="8") noviZemljisniTipovi.add(Zemljište.CRNICA)
+
+
+                val light = jsonObject.getAsJsonObject("main_species").getAsJsonObject("growth").get("light")?.takeIf { it != JsonNull.INSTANCE }?.asInt ?: 0
+                val hum = jsonObject.getAsJsonObject("main_species").getAsJsonObject("growth").get("atmospheric_humidity")?.takeIf { it != JsonNull.INSTANCE }?.asInt ?: 0
+                var noviKlimatskiTipovi = mutableListOf<KlimatskiTip>()
+
+
+                if (light in 6..9 && hum in 1..5 ) noviKlimatskiTipovi.add(KlimatskiTip.SREDOZEMNA)
+                if(light in 8..10 && hum in 7..10) noviKlimatskiTipovi.add(KlimatskiTip.TROPSKA)
+                if(light in 6..9 && hum in 5..8 ) noviKlimatskiTipovi.add(KlimatskiTip.SUBTROPSKA)
+                if(light in 4..7 && hum in 3..7) noviKlimatskiTipovi.add(KlimatskiTip.UMJERENA)
+                if(light in 7..9 && hum in 1..2) noviKlimatskiTipovi.add(KlimatskiTip.SUHA)
+                if(light in 0..5 && hum in 3..7) noviKlimatskiTipovi.add(KlimatskiTip.PLANINSKA)
+
+
+                nova = nova.copy(
+                    porodica = familyName,
+                    medicinskoUpozorenje = novoMedUpozorenje,
+                    zemljisniTipovi = noviZemljisniTipovi,
+                    klimatskiTipovi = noviKlimatskiTipovi
                 )
-
-                // main_species.specifications.growth.soil_texture
-                val soilTextureInt = plantData.getJSONObject("main_species").getJSONObject("growth").getString("soil_texture")
-
-                Log.v("soil_texture----> ", soilTextureInt)
-
-                val soilTexture = soilTextureMapping[soilTextureInt]
-                val validSoils = listOf(Zemljište.SLJUNKOVITO, Zemljište.KRECNJACKO, Zemljište.GLINENO, Zemljište.PJESKOVITO, Zemljište.ILOVACA, Zemljište.CRNICA)
-                biljka.zemljisniTipovi = biljka.zemljisniTipovi.filter { validSoils.contains(it) }.toMutableList()
-                if (soilTexture != null && !biljka.zemljisniTipovi.contains(soilTexture)) {
-                    (biljka.zemljisniTipovi as MutableList<Zemljište>).add(soilTexture)
-                }
-
-                val validClimates = mapOf(
-                    KlimatskiTip.SREDOZEMNA to (6..9 to 1..5),
-                    KlimatskiTip.TROPSKA to (8..10 to 7..10),
-                    KlimatskiTip.SUBTROPSKA to (6..9 to 5..8),
-                    KlimatskiTip.UMJERENA to (4..7 to 3..7),
-                    KlimatskiTip.SUHA to (7..9 to 1..2),
-                    KlimatskiTip.PLANINSKA to (0..5 to 3..7)
-                )
-
-                val light = plantData.getJSONObject("main_species").getJSONObject("growth").getString("light")
-                val humidity = plantData.getJSONObject("main_species").getJSONObject("growth").getString("atmospheric_humidity")
-
-                Log.v("light--> ", light.toString())
-                Log.v("humidity----> ", humidity.toString())
-
-                if (light != "null" && humidity != "null") {
-                    biljka.klimatskiTipovi = mutableListOf(
-                        KlimatskiTip.SUHA,
-                        KlimatskiTip.SREDOZEMNA,
-                        KlimatskiTip.SUBTROPSKA,
-                        KlimatskiTip.TROPSKA,
-                        KlimatskiTip.UMJERENA,
-                        KlimatskiTip.PLANINSKA
-                    )
-
-                    biljka.klimatskiTipovi = biljka.klimatskiTipovi.filter {
-                        validClimates[it]?.first?.contains(light.toInt()) == true && validClimates[it]?.second?.contains(
-                            humidity.toInt()
-                        ) == true
-                    }.toMutableList()
-                }
-
-                return@withContext biljka
-            } else {
-                return@withContext biljka
             }
-        } catch (e: Exception) {
-            e.printStackTrace()
-            return@withContext biljka
+
+            return@withContext nova
+        } catch (e: MalformedURLException) {
+            throw Exception("Cannot open HttpURLConnection", e)
+        } catch (e: IOException) {
+            throw Exception("Cannot read stream", e)
+        } catch (e: JsonParseException) {
+            throw Exception("Cannot parse JSON", e)
         }
     }
-
+}
     suspend fun getPlantsWithFlowerColor(flower_color: String, substr: String): List<Biljka> = withContext(Dispatchers.IO) {
         try {
             val urlString = "https://trefle.io/api/v1/plants?filter[flower_color]=$flower_color&token=THshD1EMlApPzeiN2RDOxz_c6E8Cu1iPRFjsK-mTJF0"
@@ -211,13 +172,11 @@ class TrefleDAO {
                             zemljisniTipovi = mutableListOf()
                         )
 
-                        // Add async task to list of deferred results
                         val deferred = async { TrefleDAO().fixData(biljka) }
                         deferredResults.add(deferred)
                     }
                 }
 
-                // Await all deferred results
                 for (deferred in deferredResults) {
                     val fixedBiljka = deferred.await()
                     filteredPlants.add(fixedBiljka)

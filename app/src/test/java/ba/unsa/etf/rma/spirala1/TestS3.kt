@@ -1,5 +1,6 @@
 package ba.unsa.etf.rma.spirala1
 
+import android.util.Log
 import kotlinx.coroutines.runBlocking
 import org.assertj.core.api.JUnitSoftAssertions
 import org.junit.Assert.assertTrue
