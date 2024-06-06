@@ -16,6 +16,7 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.NonDisposableHandle.parent
 import kotlinx.coroutines.async
 import kotlinx.coroutines.withContext
+import org.json.JSONException
 import org.json.JSONObject
 import java.io.IOException
 import java.net.HttpURLConnection
@@ -25,13 +26,16 @@ import java.util.jar.Manifest
 
 class TrefleDAO {
 
+    private lateinit var context: Context
     private lateinit var defaultBitmap: Bitmap
     private val apiKey: String = BuildConfig.API_KEY
 
-    fun init(context: Context) {
-        if (!this::defaultBitmap.isInitialized) {
-            defaultBitmap = BitmapFactory.decodeResource(context.resources, R.mipmap.ic_launcher)
-        }
+
+    fun setContext(context: Context) {
+        this.context = context
+    }
+    fun dajsliku() : Bitmap {
+        return BitmapFactory.decodeResource(context.resources, R.mipmap.ic_launcher)
     }
 
     fun dajLatinski(naziv: String): String {
@@ -44,29 +48,42 @@ class TrefleDAO {
         }
     }
 
-    suspend fun getImage(biljka: Biljka): Bitmap = withContext(Dispatchers.IO) {
-        try {
-            val latinName = dajLatinski(biljka.naziv.toString())
-            val urlString =
-                "https://trefle.io/api/v1/plants/search?q=$latinName&token=$apiKey"
-            val url = URL(urlString)
-            val connection = url.openConnection() as HttpURLConnection
-            connection.requestMethod = "GET"
+    sealed class Result<out R> {
+        data class Success<out T>(val data: T) : Result<T>()
+        data class Error(val exception: Exception) : Result<Nothing>()
+    }
 
-            if (connection.responseCode == HttpURLConnection.HTTP_OK) {
-                val response = connection.inputStream.bufferedReader().use { it.readText() }
-                val json = JSONObject(response)
-                val imageUrl = json.getJSONArray("data").getJSONObject(0).getString("image_url")
+    suspend fun getImage(biljka: Biljka): Result<Bitmap>{
+        return withContext(Dispatchers.IO){
+            try{
+                val latinski = dajLatinski(biljka.naziv.toString())
+                val url1 = "https://trefle.io/api/v1/plants/search?q=$latinski&token=$apiKey"
+                val url = URL(url1)
+                (url.openConnection() as? HttpURLConnection)?.run{
+                    val result = this.inputStream.bufferedReader().use{it.readText()}
+                    val jo = JSONObject(result)
+                    var slikaurl = ""
+                    val objekti = jo.getJSONArray("data")
+                    if(objekti.length()>0){
+                        slikaurl = objekti.getJSONObject(0).getString("image_url")
+                        return@withContext Result.Success(BitmapFactory.decodeStream(URL(slikaurl).openStream()))
+                    }
+                }
+                defaultBitmap = dajsliku()
+                return@withContext Result.Success(defaultBitmap)
 
-                return@withContext BitmapFactory.decodeStream(URL(imageUrl).openStream())
-            } else {
-                return@withContext defaultBitmap
             }
-        } catch (e: Exception) {
-            e.printStackTrace()
-            return@withContext defaultBitmap
+            catch (e: MalformedURLException) {
+                return@withContext Result.Error(Exception("Cannot open HttpURLConnection"))
+            } catch (e: IOException) {
+                return@withContext Result.Error(Exception("Cannot read stream"))
+            } catch (e: JSONException) {
+                return@withContext Result.Error(Exception("Cannot parse JSON"))
+            }
         }
     }
+
+
 
     suspend fun fixData(biljka: Biljka): Biljka {
         return withContext(Dispatchers.IO) {
@@ -183,22 +200,27 @@ class TrefleDAO {
                         val ime1 = filtriraneBiljke.get("scientific_name")?.takeIf { it != JsonNull.INSTANCE }?.asString ?: ""
 
                         val naziv = "$ime ($ime1)"
-                        val porodica = filtriraneBiljke.getAsJsonObject("main_species").get("family")?.takeIf { it != JsonNull.INSTANCE }?.asString ?: ""
-
-                        val flower = filtriraneBiljke.getAsJsonObject("main_species").getAsJsonObject("flower")
-
-                        var colors: List<String> = emptyList()
-                        if (flower != null && flower.has("color") && !flower.get("color").isJsonNull) {
-                            val colorElement = flower.get("color")
-                            if (colorElement.isJsonArray) {
-                                val colorArray = colorElement.asJsonArray
-                                colors = colorArray.mapNotNull { it.asString }
-                            }
-                        }
 
                         var hasFlowerColor = false
-                        if (colors.contains(flowerColor)) hasFlowerColor = true
+                        var porodica:String = ""
+                        if (filtriraneBiljke.has("main_species")) {
+                            porodica = filtriraneBiljke.getAsJsonObject("main_species").get("family")
+                                    ?.takeIf { it != JsonNull.INSTANCE }?.asString ?: ""
 
+                            val flower = filtriraneBiljke.getAsJsonObject("main_species")
+                                .getAsJsonObject("flower")
+
+                            var colors: List<String> = emptyList()
+                            if (flower != null && flower.has("color") && !flower.get("color").isJsonNull) {
+                                val colorElement = flower.get("color")
+                                if (colorElement.isJsonArray) {
+                                    val colorArray = colorElement.asJsonArray
+                                    colors = colorArray.mapNotNull { it.asString }
+                                }
+                            }
+
+                            if (colors.contains(flowerColor)) hasFlowerColor = true
+                        }
                         if (hasFlowerColor) {
                             val n = Biljka(
                                 naziv = naziv,

@@ -22,6 +22,7 @@ import androidx.recyclerview.widget.RecyclerView
 import com.google.android.material.floatingactionbutton.FloatingActionButton
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.Job
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 
@@ -138,12 +139,14 @@ class MainActivity : AppCompatActivity() {
             val searchText = pretragaET.text.toString()
             val selectedColor = bojaSPIN.selectedItem?.toString()
             if (searchText.isNotEmpty() && !selectedColor.isNullOrEmpty()) {
-                CoroutineScope(Dispatchers.Main).launch {
-                    val plants = withContext(Dispatchers.IO) {
-                        TrefleDAO().getPlantsWithFlowerColor(selectedColor, searchText)
+                    val scope = CoroutineScope(Job() + Dispatchers.Main)
+
+                    scope.launch {
+                        val result = TrefleDAO().getPlantsWithFlowerColor(selectedColor, searchText)
+                        updateRecyclerView(result,false)
                     }
-                    updateRecyclerView(plants, false)
-                }
+
+
             } else {
                 Toast.makeText(
                     this@MainActivity,

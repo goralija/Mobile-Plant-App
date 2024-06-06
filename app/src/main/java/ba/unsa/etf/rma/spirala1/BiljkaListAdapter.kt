@@ -1,6 +1,7 @@
 package ba.unsa.etf.rma.spirala1
 
 import android.content.Context
+import android.graphics.Bitmap
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
@@ -10,7 +11,9 @@ import androidx.core.content.ContextCompat.getString
 import androidx.recyclerview.widget.RecyclerView
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.Job
 import kotlinx.coroutines.launch
+import ba.unsa.etf.rma.spirala1.TrefleDAO.Result
 import kotlinx.coroutines.withContext
 
 class BiljkaListAdapter(private var biljke: List<Biljka>, private var selectedMode: String,
@@ -54,11 +57,15 @@ class BiljkaListAdapter(private var biljke: List<Biljka>, private var selectedMo
         else
             mainActivity.setBotanicMode(false)
 
-        CoroutineScope(Dispatchers.Main).launch {
-            val bitmap = withContext(Dispatchers.IO) {
-                TrefleDAO().getImage(biljke[position])
+        val scope = CoroutineScope(Job() + Dispatchers.Main)
+
+        scope.launch {
+            val result = TrefleDAO().getImage(biljke[position])
+
+            when(result){
+                is Result.Success<Bitmap> -> {holder.slika.setImageBitmap(result.data)}
+                else -> {}
             }
-            holder.slika.setImageBitmap(bitmap)
         }
     }
     fun updateBiljke(biljke: List<Biljka>, clickable: Boolean=true) {
