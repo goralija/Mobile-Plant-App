@@ -168,108 +168,44 @@ class TrefleDAO {
         }
     }
 
-    /*
-    suspend fun getPlantsWithFlowerColor(flower_color: String, substr: String): List<Biljka> = withContext(Dispatchers.IO) {
-        try {
-            val urlString = "https://trefle.io/api/v1/plants?filter[flower_color]=$flower_color&token=apiKey"
-            val url = URL(urlString)
-            val connection = url.openConnection() as HttpURLConnection
-            connection.requestMethod = "GET"
-
-            if (connection.responseCode == HttpURLConnection.HTTP_OK) {
-                val response = connection.inputStream.bufferedReader().use { it.readText() }
-                val json = JSONObject(response)
-                val plants = json.getJSONArray("data")
-                val filteredPlants = mutableListOf<Biljka>()
-
-                // List of deferred results
-                val deferredResults = mutableListOf<Deferred<Biljka>>()
-
-                for (i in 0 until plants.length()) {
-                    val plant = plants.getJSONObject(i)
-                    val plantName = plant.getString("common_name") + " (" + plant.getString("scientific_name") + ")"
-                    if (plantName.contains(substr, true)) {
-                        val naziv = plant.optString("common_name", "") + " (" + plant.optString("scientific_name", "") + ")"
-
-                        var biljka = Biljka(
-                            naziv = naziv,
-                            porodica = "",
-                            medicinskoUpozorenje = null,
-                            medicinskeKoristi = mutableListOf(),
-                            profilOkusa = null,
-                            jela = mutableListOf(),
-                            klimatskiTipovi = mutableListOf(),
-                            zemljisniTipovi = mutableListOf()
-                        )
-
-                        val deferred = async { TrefleDAO().fixData(biljka) }
-                        deferredResults.add(deferred)
-                    }
-                }
-
-                for (deferred in deferredResults) {
-                    val fixedBiljka = deferred.await()
-                    filteredPlants.add(fixedBiljka)
-                }
-
-                return@withContext filteredPlants
-            } else {
-                return@withContext emptyList<Biljka>()
-            }
-        } catch (e: Exception) {
-            e.printStackTrace()
-            return@withContext emptyList<Biljka>()
-        }
-    }
-}
-     */
     suspend fun getPlantsWithFlowerColor(flowerColor: String, substr: String): List<Biljka> {
         return withContext(Dispatchers.IO) {
             try {
-                var idd = emptyList<Int>().toMutableList()
-                val url1 =
-                    "https://trefle.io/api/v1/plants/search?q=$substr&token=$apiKey"
-                val url = URL(url1)
+                var ajdijevi = emptyList<Int>().toMutableList()
+                val urll = "https://trefle.io/api/v1/plants/search?q=$substr&token=$apiKey"
+                val url = URL(urll)
                 val listaTrazenihBiljki = mutableListOf<Biljka>()
 
                 (url.openConnection() as? HttpURLConnection)?.run {
                     val result = this.inputStream.bufferedReader().use { it.readText() }
-                    val jo = JsonParser.parseString(result).asJsonObject
+                    val json = JsonParser.parseString(result).asJsonObject
 
-                    val filtriraneBiljke = jo.getAsJsonArray("data")
+                    val filtriraneBiljke = json.getAsJsonArray("data")
                     for (i in 0 until filtriraneBiljke.size()) {
-                        idd.add(filtriraneBiljke[i].asJsonObject.get("id").asInt)
+                        ajdijevi.add(filtriraneBiljke[i].asJsonObject.get("id").asInt)
                     }
 
 
                 }
 
-                for (k in 0 until idd.size) {
-                    var mmm = idd[k]
-
-                    val url2 =
-                        "https://trefle.io/api/v1/plants/$mmm?token=$apiKey"
-                    val url22 = URL(url2)
+                for (k in 0 until ajdijevi.size) {
+                    var a = ajdijevi[k]
+                    val urlll = "https://trefle.io/api/v1/plants/$a?token=$apiKey"
+                    val url2 = URL(urlll)
 
 
-                    (url22.openConnection() as? HttpURLConnection)?.run {
+                    (url2.openConnection() as? HttpURLConnection)?.run {
                         val result = this.inputStream.bufferedReader().use { it.readText() }
-                        val filtriraneBiljke =
-                            JsonParser.parseString(result).asJsonObject.getAsJsonObject("data")
+                        val filtriraneBiljke = JsonParser.parseString(result).asJsonObject.getAsJsonObject("data")
 
-                        val ime = filtriraneBiljke.get("common_name")
-                            ?.takeIf { it != JsonNull.INSTANCE }?.asString ?: ""
-                        val ime1 = filtriraneBiljke.get("scientific_name")
-                            ?.takeIf { it != JsonNull.INSTANCE }?.asString ?: ""
+                        val ime = filtriraneBiljke.get("common_name")?.takeIf { it != JsonNull.INSTANCE }?.asString ?: ""
+                        val ime1 = filtriraneBiljke.get("scientific_name")?.takeIf { it != JsonNull.INSTANCE }?.asString ?: ""
 
                         val naziv = "$ime ($ime1)"
-                        val porodica =
-                            filtriraneBiljke.getAsJsonObject("main_species").get("family")
-                                ?.takeIf { it != JsonNull.INSTANCE }?.asString ?: ""
+                        val porodica = filtriraneBiljke.getAsJsonObject("main_species").get("family")?.takeIf { it != JsonNull.INSTANCE }?.asString ?: ""
 
 
-                        val flower = filtriraneBiljke.getAsJsonObject("main_species")
-                            .getAsJsonObject("flower")
+                        val flower = filtriraneBiljke.getAsJsonObject("main_species").getAsJsonObject("flower")
 
 
                         var colors: List<String> = emptyList()
@@ -281,25 +217,21 @@ class TrefleDAO {
                             }
                         }
 
-
                         var hasFlowerColor = false
-                        if (colors.contains(flowerColor)) {
-                            hasFlowerColor = true
-                        }
-
+                        if (colors.contains(flowerColor)) hasFlowerColor = true
 
                         if (hasFlowerColor) {
-                            val kompletiranaBiljka = Biljka(
+                            val n = Biljka(
                                 naziv = naziv,
                                 porodica = porodica,
-                                medicinskoUpozorenje = null,  // medicinskoUpozorenje
-                                medicinskeKoristi = emptyList(),  // medicinskeKoristi
-                                profilOkusa = null,  // profilOkusa
-                                jela = emptyList(),  // jela
-                                klimatskiTipovi = emptyList(),
-                                zemljisniTipovi = emptyList()
+                                medicinskoUpozorenje = null,
+                                medicinskeKoristi = listOf(),
+                                profilOkusa = null,
+                                jela = listOf(),
+                                klimatskiTipovi = listOf(),
+                                zemljisniTipovi = listOf()
                             )
-                            listaTrazenihBiljki.add(kompletiranaBiljka)
+                            listaTrazenihBiljki.add(n)
                         }
                     }
                 }
