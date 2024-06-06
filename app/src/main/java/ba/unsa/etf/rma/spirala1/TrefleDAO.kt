@@ -158,7 +158,7 @@ class TrefleDAO {
         return withContext(Dispatchers.IO) {
             try {
                 var ajdijevi = emptyList<Int>().toMutableList()
-                val urll = "https://trefle.io/api/v1/plants/search?q=$substr&token=$apiKey"
+                val urll = "https://trefle.io/api/v1/plants/search?q=$substr&token=$apiKey&filter[flower_color]=$flowerColor"
                 val url = URL(urll)
                 val listaTrazenihBiljki = mutableListOf<Biljka>()
 
@@ -167,14 +167,12 @@ class TrefleDAO {
                     val json = JsonParser.parseString(result).asJsonObject
 
                     val filtriraneBiljke = json.getAsJsonArray("data")
-                    for (i in 0 until filtriraneBiljke.size()) {
+                    for (i in 0 until filtriraneBiljke.size())
                         ajdijevi.add(filtriraneBiljke[i].asJsonObject.get("id").asInt)
-                    }
                 }
 
                 for (k in 0 until ajdijevi.size) {
-                    var a = ajdijevi[k]
-                    val urlll = "https://trefle.io/api/v1/plants/$a?token=$apiKey"
+                    val urlll = "https://trefle.io/api/v1/plants/${ajdijevi[k]}?token=$apiKey"
                     val url2 = URL(urlll)
 
                     (url2.openConnection() as? HttpURLConnection)?.run {
