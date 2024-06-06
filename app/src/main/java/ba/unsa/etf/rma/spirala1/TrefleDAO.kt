@@ -72,8 +72,7 @@ class TrefleDAO {
         return withContext(Dispatchers.IO) {
             try {
                 val latinski = dajLatinski(biljka.naziv.toString())
-                val urll =
-                    "https://trefle.io/api/v1/plants/search?q=$latinski&token=$apiKey"
+                val urll = "https://trefle.io/api/v1/plants/search?q=$latinski&token=$apiKey"
                 val url = URL(urll)
                 var id: Int = 0
 
@@ -88,8 +87,7 @@ class TrefleDAO {
                     }
                 } ?: throw Exception("Failed to open connection")
 
-                val urlll =
-                    URL("https://trefle.io/api/v1/plants/$id?token=$apiKey")
+                val urlll = URL("https://trefle.io/api/v1/plants/$id?token=$apiKey")
                 var nova: Biljka = biljka
 
                 (urlll.openConnection() as? HttpURLConnection)?.run {
@@ -117,22 +115,12 @@ class TrefleDAO {
                             .get("soil_texture")?.takeIf { it != JsonNull.INSTANCE }?.asString ?: ""
                     var noviZemljisniTipovi = mutableListOf<Zemljište>()
 
-
                     if (soilTexture1 == "9") noviZemljisniTipovi.add(Zemljište.SLJUNKOVITO)
                     if (soilTexture1 == "10") noviZemljisniTipovi.add(Zemljište.KRECNJACKO)
-                    if (soilTexture1 == "1" || soilTexture1 == "2") noviZemljisniTipovi.add(
-                        Zemljište.GLINENO
-                    )
-                    if (soilTexture1 == "3" || soilTexture1 == "4") noviZemljisniTipovi.add(
-                        Zemljište.PJESKOVITO
-                    )
-                    if (soilTexture1 == "5" || soilTexture1 == "6") noviZemljisniTipovi.add(
-                        Zemljište.ILOVACA
-                    )
-                    if (soilTexture1 == "7" || soilTexture1 == "8") noviZemljisniTipovi.add(
-                        Zemljište.CRNICA
-                    )
-
+                    if (soilTexture1 == "1" || soilTexture1 == "2") noviZemljisniTipovi.add(Zemljište.GLINENO)
+                    if (soilTexture1 == "3" || soilTexture1 == "4") noviZemljisniTipovi.add(Zemljište.PJESKOVITO)
+                    if (soilTexture1 == "5" || soilTexture1 == "6") noviZemljisniTipovi.add(Zemljište.ILOVACA)
+                    if (soilTexture1 == "7" || soilTexture1 == "8") noviZemljisniTipovi.add(Zemljište.CRNICA)
 
                     val light = jsonObject.getAsJsonObject("main_species").getAsJsonObject("growth")
                         .get("light")?.takeIf { it != JsonNull.INSTANCE }?.asInt ?: 0
@@ -140,14 +128,12 @@ class TrefleDAO {
                         .get("atmospheric_humidity")?.takeIf { it != JsonNull.INSTANCE }?.asInt ?: 0
                     var noviKlimatskiTipovi = mutableListOf<KlimatskiTip>()
 
-
                     if (light in 6..9 && hum in 1..5) noviKlimatskiTipovi.add(KlimatskiTip.SREDOZEMNA)
                     if (light in 8..10 && hum in 7..10) noviKlimatskiTipovi.add(KlimatskiTip.TROPSKA)
                     if (light in 6..9 && hum in 5..8) noviKlimatskiTipovi.add(KlimatskiTip.SUBTROPSKA)
                     if (light in 4..7 && hum in 3..7) noviKlimatskiTipovi.add(KlimatskiTip.UMJERENA)
                     if (light in 7..9 && hum in 1..2) noviKlimatskiTipovi.add(KlimatskiTip.SUHA)
                     if (light in 0..5 && hum in 3..7) noviKlimatskiTipovi.add(KlimatskiTip.PLANINSKA)
-
 
                     nova = nova.copy(
                         porodica = familyName,
@@ -184,15 +170,12 @@ class TrefleDAO {
                     for (i in 0 until filtriraneBiljke.size()) {
                         ajdijevi.add(filtriraneBiljke[i].asJsonObject.get("id").asInt)
                     }
-
-
                 }
 
                 for (k in 0 until ajdijevi.size) {
                     var a = ajdijevi[k]
                     val urlll = "https://trefle.io/api/v1/plants/$a?token=$apiKey"
                     val url2 = URL(urlll)
-
 
                     (url2.openConnection() as? HttpURLConnection)?.run {
                         val result = this.inputStream.bufferedReader().use { it.readText() }
@@ -204,9 +187,7 @@ class TrefleDAO {
                         val naziv = "$ime ($ime1)"
                         val porodica = filtriraneBiljke.getAsJsonObject("main_species").get("family")?.takeIf { it != JsonNull.INSTANCE }?.asString ?: ""
 
-
                         val flower = filtriraneBiljke.getAsJsonObject("main_species").getAsJsonObject("flower")
-
 
                         var colors: List<String> = emptyList()
                         if (flower != null && flower.has("color") && !flower.get("color").isJsonNull) {
@@ -235,8 +216,6 @@ class TrefleDAO {
                         }
                     }
                 }
-
-
                 return@withContext listaTrazenihBiljki
             } catch (e: MalformedURLException) {
                 throw Exception("Cannot open HttpURLConnection", e)
