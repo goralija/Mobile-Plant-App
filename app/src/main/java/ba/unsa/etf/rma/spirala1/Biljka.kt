@@ -4,11 +4,16 @@ import android.os.Parcel
 import android.os.Parcelable
 import androidx.room.ColumnInfo
 import androidx.room.Entity
+import androidx.room.PrimaryKey
+import androidx.room.TypeConverters
 import com.google.gson.annotations.SerializedName
+import java.io.Serializable
 
 
 @Entity
+@TypeConverters(Converters::class)
 data class Biljka(
+    @PrimaryKey(autoGenerate = true) val id: Int,
     @ColumnInfo(name = "naziv") @SerializedName("naziv") var naziv: String,
     @ColumnInfo(name = "porodica") @SerializedName("porodica") var porodica: String,
     @ColumnInfo(name = "medicinsko_upozorenje") @SerializedName("medicinsko_upozorenje") var medicinskoUpozorenje: String?,
@@ -18,14 +23,12 @@ data class Biljka(
     @ColumnInfo(name = "klimatski_tipovi") @SerializedName("klimatski_tipovi") var klimatskiTipovi: List<KlimatskiTip>,
     @ColumnInfo(name = "zemljisni_tipovi") @SerializedName("zemljisni_tipovi") var zemljisniTipovi: List<Zemljište>,
     @ColumnInfo(name = "online_checked") @SerializedName("online_checked") var onlineChecked: Boolean,
-) : Parcelable
+) : Serializable
 
 
+    /*
 
-
-
-
-{
+    Parcelable {
     constructor(parcel: Parcel) : this(
         parcel.readString().toString(),
         parcel.readString().toString(),
@@ -62,4 +65,5 @@ data class Biljka(
             return arrayOfNulls(size)
         }
     }
-}
+
+} */

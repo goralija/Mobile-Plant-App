@@ -18,27 +18,40 @@ class BiljkaRepository(context: Context) {
     init { refreshAllBiljkas() }
 
     suspend fun saveBiljka(biljka: Biljka): Boolean {
-        return withContext(Dispatchers.IO) {
-            biljkaDao.saveBiljka(biljka)
-        }
+        return biljkaDao.saveBiljka(biljka) != false
     }
 
     suspend fun fixOfflineBiljka(): Int {
-        return withContext(Dispatchers.IO) {
-            biljkaDao.fixOfflineBiljka()
+        val offlineBiljkas = biljkaDao.getOfflineBiljkas()
+        var updatedCount = 0
+
+        for (biljka in offlineBiljkas) {
+            val fixedBiljka = TrefleDAO().fixData(biljka) // Your fixData method implementation
+            if (biljka != fixedBiljka) {
+                biljkaDao.updateBiljka(fixedBiljka)
+                updatedCount++
+            }
         }
+
+        return updatedCount
     }
 
     suspend fun addImage(idBiljke: Long, bitmap: Bitmap): Boolean {
-        return withContext(Dispatchers.IO) {
-            biljkaDao.addImage(idBiljke, bitmap)
+        val biljka = biljkaDao.getBiljkaById(idBiljke)
+        return if (biljka != null) {
+            val biljkaImage = BiljkaBitmap(idBiljke, bitmap)
+            biljkaDao.addImage(biljkaImage) > 0
+        } else {
+            false
         }
     }
 
+    suspend fun getAllBiljkas(): List<Biljka> {
+        return biljkaDao.getAllBiljkas()
+    }
+
     suspend fun clearData() {
-        withContext(Dispatchers.IO) {
-            biljkaDao.clearData()
-        }
+        biljkaDao.clearData()
     }
 
     private fun refreshAllBiljkas() {
@@ -47,6 +60,4 @@ class BiljkaRepository(context: Context) {
             aaallBiljkas.postValue(biljkas)
         }
     }
-
-    fun getAllBiljkas(): LiveData<List<Biljka>> { return allBiljkas }
 }

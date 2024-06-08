@@ -223,6 +223,7 @@ class TrefleDAO {
                         }
                         if (hasFlowerColor) {
                             val n = Biljka(
+                                id = 1,
                                 naziv = naziv,
                                 porodica = porodica,
                                 medicinskoUpozorenje = null,
@@ -230,7 +231,8 @@ class TrefleDAO {
                                 profilOkusa = null,
                                 jela = listOf(),
                                 klimatskiTipovi = listOf(),
-                                zemljisniTipovi = listOf()
+                                zemljisniTipovi = listOf(),
+                                onlineChecked = true,
                             )
                             listaTrazenihBiljki.add(n)
                         }
