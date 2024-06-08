@@ -2,17 +2,30 @@ package ba.unsa.etf.rma.spirala1
 
 import android.os.Parcel
 import android.os.Parcelable
+import androidx.room.ColumnInfo
+import androidx.room.Entity
+import com.google.gson.annotations.SerializedName
 
+
+@Entity
 data class Biljka(
-    var naziv: String,
-    var porodica: String,
-    var medicinskoUpozorenje: String?,
-    val medicinskeKoristi: List<MedicinskaKorist>,
-    val profilOkusa: ProfilOkusaBiljke?,
-    var jela: List<String>,
-    var klimatskiTipovi: List<KlimatskiTip>,
-    var zemljisniTipovi: List<Zemljište>,
-) : Parcelable {
+    @ColumnInfo(name = "naziv") @SerializedName("naziv") var naziv: String,
+    @ColumnInfo(name = "porodica") @SerializedName("porodica") var porodica: String,
+    @ColumnInfo(name = "medicinsko_upozorenje") @SerializedName("medicinsko_upozorenje") var medicinskoUpozorenje: String?,
+    @ColumnInfo(name = "medicinske_koristi") @SerializedName("medicinske_koristi") val medicinskeKoristi: List<MedicinskaKorist>,
+    @ColumnInfo(name = "profil_okusa") @SerializedName("profil_okusa") val profilOkusa: ProfilOkusaBiljke?,
+    @ColumnInfo(name = "jela") @SerializedName("jela") var jela: List<String>,
+    @ColumnInfo(name = "klimatski_tipovi") @SerializedName("klimatski_tipovi") var klimatskiTipovi: List<KlimatskiTip>,
+    @ColumnInfo(name = "zemljisni_tipovi") @SerializedName("zemljisni_tipovi") var zemljisniTipovi: List<Zemljište>,
+    @ColumnInfo(name = "online_checked") @SerializedName("online_checked") var onlineChecked: Boolean,
+) : Parcelable
+
+
+
+
+
+
+{
     constructor(parcel: Parcel) : this(
         parcel.readString().toString(),
         parcel.readString().toString(),
@@ -21,7 +34,8 @@ data class Biljka(
         parcel.readSerializable() as? ProfilOkusaBiljke,
         parcel.createStringArrayList()?.toMutableList() ?: mutableListOf(),
         parcel.createStringArrayList()?.map { KlimatskiTip.valueOf(it) }?.toMutableList() ?: mutableListOf(),
-        parcel.createStringArrayList()?.map { Zemljište.valueOf(it) }?.toMutableList() ?: mutableListOf()
+        parcel.createStringArrayList()?.map { Zemljište.valueOf(it) }?.toMutableList() ?: mutableListOf(),
+        false
     )
 
     override fun describeContents(): Int {
