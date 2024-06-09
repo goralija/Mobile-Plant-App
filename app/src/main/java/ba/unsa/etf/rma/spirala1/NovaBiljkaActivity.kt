@@ -158,9 +158,9 @@ class NovaBiljkaActivity : AppCompatActivity() {
                 }
                 val selectedProfilOkusa = ProfilOkusaBiljke.values()[profilOkusaLV.checkedItemPosition]
                 var jela = jelaList.toMutableList()
-                val novaBiljka = Biljka(0, naziv, porodica, medicinskoUpozorenje,
-                    selectedMedicinskaKorist, selectedProfilOkusa, jela, selectedKlimatskiTip,
-                    selectedZemljisniTip, false)
+                val novaBiljka = Biljka(id=0, naziv=naziv, porodica=porodica, medicinskoUpozorenje=medicinskoUpozorenje,
+                    medicinskeKoristi = selectedMedicinskaKorist, profilOkusa = selectedProfilOkusa, jela = jela, klimatskiTipovi = selectedKlimatskiTip,
+                    zemljisniTipovi = selectedZemljisniTip, onlineChecked = false)
 
                 Log.v("biljkaaaa1-------",novaBiljka.toString())
 
@@ -204,8 +204,8 @@ class NovaBiljkaActivity : AppCompatActivity() {
 
     private fun validateInputs(): Boolean {
         var valid = true
-        if (nazivET.text.isEmpty() || nazivET.text.length !in 2..20) {
-            nazivET.error = "Naziv mora imati između 2 i 20 znakova"
+        if (nazivET.text.isEmpty() || nazivET.text.length !in 2..40) {
+            nazivET.error = "Naziv mora imati između 2 i 40 znakova"
             valid = false
         }
         if (porodicaET.text.isEmpty() || porodicaET.text.length !in 2..20) {

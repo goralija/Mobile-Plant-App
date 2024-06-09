@@ -63,20 +63,20 @@ class BiljkaListAdapter(private var biljke: List<Biljka>, private var selectedMo
         val scope = CoroutineScope(Job() + Dispatchers.Main)
 
         scope.launch {
-            val existingImage = biljkaDAO.getImageByIdBiljke(biljke[position].id)
-            if (existingImage != null)
-                holder.slika.setImageBitmap((existingImage.bitmap))
-            else {
-                val result = TrefleDAO().getImage(biljke[position])
-
-                when (result) {
-                    is Result.Success<Bitmap> -> {
-                        biljkaDAO.addImage(biljke[position].id, result.data)
-                        holder.slika.setImageBitmap(result.data)
-                    } else -> {}
-                }
+            if (position < biljke.size) {
+                val bb = biljkaDAO.getImageByIdBiljke(biljke[position].id)
+                if (bb == null) {
+                    val result = TrefleDAO().getImage(biljke[position])
+                    when (result) {
+                        is Result.Success<Bitmap> -> {
+                            biljkaDAO.addImage(biljke[position].id, result.data)
+                            holder.slika.setImageBitmap(result?.data)
+                        } else -> {}
+                    }
+                } else holder.slika.setImageBitmap(bb?.bitmap)
             }
         }
+
     }
     fun updateBiljke(biljke: List<Biljka>, clickable: Boolean=true) {
         this.biljke = biljke

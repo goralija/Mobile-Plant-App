@@ -2,8 +2,9 @@ package ba.unsa.etf.rma.spirala1
 
 import android.annotation.SuppressLint
 import android.content.Intent
-import android.graphics.BitmapFactory
+import android.database.CursorWindow
 import android.os.Bundle
+import android.util.Log
 import android.view.View
 import android.view.ViewGroup
 import android.widget.AdapterView
@@ -15,7 +16,6 @@ import android.widget.Toast
 import androidx.activity.enableEdgeToEdge
 import androidx.appcompat.app.AppCompatActivity
 import androidx.constraintlayout.widget.ConstraintLayout
-import androidx.core.view.marginBottom
 import androidx.core.view.updateLayoutParams
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
@@ -25,6 +25,8 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
+import java.lang.reflect.Field
+
 
 class MainActivity : AppCompatActivity() {
     private lateinit var biljkaDAO: BiljkaDAO
@@ -82,6 +84,14 @@ class MainActivity : AppCompatActivity() {
         super.onCreate(savedInstanceState)
         enableEdgeToEdge()
         setContentView(R.layout.activity_main)
+
+        try {
+            val field: Field = CursorWindow::class.java.getDeclaredField("sCursorWindowSize")
+            field.setAccessible(true)
+            field.set(null, 100 * 1024 * 1024) //the 100MB is the new size
+        } catch (e: Exception) {
+            Log.e("error",e.toString())
+        }
 
         biljkaDAO = BiljkaDatabase.getDatabase(this@MainActivity).biljkaDao()
         //clearDatabase()

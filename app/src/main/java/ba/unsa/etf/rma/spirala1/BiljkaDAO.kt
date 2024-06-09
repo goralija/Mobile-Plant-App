@@ -12,28 +12,27 @@ import kotlinx.coroutines.withContext
 
 @Dao
 interface BiljkaDAO {
-    @Insert(onConflict = OnConflictStrategy.IGNORE)
+    @Insert(onConflict = OnConflictStrategy.REPLACE)
     suspend fun insertImage(biljkaBitmap: BiljkaBitmap): Long
 
-    @Query("SELECT * FROM biljka WHERE id = :idBiljke LIMIT 1")
+    @Query("SELECT * FROM biljka WHERE id = :idBiljke")
     suspend fun getBiljkaById(idBiljke: Long): Biljka?
 
-    @Query("SELECT * FROM biljka_bitmap WHERE idBiljke = :idBiljke LIMIT 1")
+    @Query("SELECT * FROM biljka_bitmap WHERE idBiljke = :idBiljke")
     suspend fun getImageByIdBiljke(idBiljke: Long): BiljkaBitmap?
 
     @Insert(onConflict = OnConflictStrategy.REPLACE)
     suspend fun addImage(idBiljke: Long,bitmap: Bitmap):Boolean {
-        return withContext(Dispatchers.IO) {
-            val biljka = getBiljkaById(idBiljke)
-            val existingImage = getImageByIdBiljke(idBiljke)
+        val biljka = getBiljkaById(idBiljke)
+        val biljkaBitmap = getImageByIdBiljke(idBiljke)
 
-            if (biljka == null || existingImage != null) {
-                false
-            } else {
-                val biljkaBitmap = BiljkaBitmap(idBiljke = idBiljke, bitmap = bitmap)
-                insertImage(biljkaBitmap) != -1L
-            }
+        return if (biljka != null && biljkaBitmap == null) {
+            insertImage(BiljkaBitmap(idBiljke, bitmap))
+            true
+        } else {
+            false
         }
+
     }
     @Query("SELECT * FROM Biljka WHERE online_checked = 0")
     suspend fun getOfflineBiljkas(): List<Biljka>
