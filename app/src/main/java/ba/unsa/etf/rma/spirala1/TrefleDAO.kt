@@ -142,6 +142,8 @@ class TrefleDAO {
                     if (soilTexture1 == "5" || soilTexture1 == "6") noviZemljisniTipovi.add(Zemljište.ILOVACA)
                     if (soilTexture1 == "7" || soilTexture1 == "8") noviZemljisniTipovi.add(Zemljište.CRNICA)
 
+                    if (noviZemljisniTipovi.isEmpty()) noviZemljisniTipovi = biljka.zemljisniTipovi.toMutableList()
+
                     val light = jsonObject.getAsJsonObject("main_species").getAsJsonObject("growth")
                         .get("light")?.takeIf { it != JsonNull.INSTANCE }?.asInt ?: 0
                     val hum = jsonObject.getAsJsonObject("main_species").getAsJsonObject("growth")
@@ -154,6 +156,8 @@ class TrefleDAO {
                     if (light in 4..7 && hum in 3..7) noviKlimatskiTipovi.add(KlimatskiTip.UMJERENA)
                     if (light in 7..9 && hum in 1..2) noviKlimatskiTipovi.add(KlimatskiTip.SUHA)
                     if (light in 0..5 && hum in 3..7) noviKlimatskiTipovi.add(KlimatskiTip.PLANINSKA)
+
+                    if (noviKlimatskiTipovi.isEmpty()) noviKlimatskiTipovi = biljka.klimatskiTipovi.toMutableList()
 
                     nova = nova.copy(
                         porodica = familyName,

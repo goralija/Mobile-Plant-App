@@ -193,8 +193,8 @@ class NovaBiljkaActivity : AppCompatActivity() {
 
     private fun validateInputs(): Boolean {
         var valid = true
-        if (nazivET.text.isEmpty() || nazivET.text.length !in 2..20) {
-            nazivET.error = "Naziv mora imati između 2 i 20 znakova"
+        if (nazivET.text.isEmpty() || nazivET.text.length !in 2..40) {
+            nazivET.error = "Naziv mora imati između 2 i 40 znakova"
             valid = false
         }
         if (porodicaET.text.isEmpty() || porodicaET.text.length !in 2..20) {
