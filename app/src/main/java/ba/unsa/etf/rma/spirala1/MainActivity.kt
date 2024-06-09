@@ -145,7 +145,7 @@ class MainActivity : AppCompatActivity() {
                         val result = TrefleDAO().getPlantsWithFlowerColor(selectedColor, searchText)
                         updateRecyclerView(result,false)
                     }
-
+                setBotanicMode(false)
 
             } else {
                 Toast.makeText(
@@ -154,7 +154,6 @@ class MainActivity : AppCompatActivity() {
                     Toast.LENGTH_SHORT
                 ).show()
             }
-            setBotanicMode(false)
         }
     }
 }
