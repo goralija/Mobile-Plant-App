@@ -6,7 +6,7 @@ import androidx.room.Room
 import androidx.room.RoomDatabase
 import androidx.room.TypeConverters
 
-@Database(entities = [Biljka::class, BiljkaBitmap::class], version = 1)
+@Database(entities = [Biljka::class, BiljkaBitmap::class], version = 2)
 @TypeConverters(Converters::class)
 abstract class BiljkaDatabase : RoomDatabase() {
     abstract fun biljkaDao(): BiljkaDAO
@@ -21,6 +21,8 @@ abstract class BiljkaDatabase : RoomDatabase() {
 
         private fun buildDatabase(context: Context) =
             Room.databaseBuilder(context, BiljkaDatabase::class.java, "biljke-db")
+                .fallbackToDestructiveMigration()
                 .build()
+
     }
 }
