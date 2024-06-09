@@ -122,6 +122,9 @@ class TrefleDAO {
                         jsonObject.getAsJsonObject("main_species").getAsJsonObject("specifications")
                             .get("toxicity")?.takeIf { it != JsonNull.INSTANCE }?.asString ?: "none"
 
+                    var novaJela = biljka.jela
+                    if (!isEdible || toxicity != "none") novaJela = listOf()
+
                     val novoMedUpozorenje = StringBuilder(biljka.medicinskoUpozorenje ?: "").apply {
                         if (!isEdible) append(" NIJE JESTIVO")
                         if (toxicity != "none" && !contains("TOKSIČNO")) append(" TOKSIČNO")
@@ -154,6 +157,7 @@ class TrefleDAO {
 
                     nova = nova.copy(
                         porodica = familyName,
+                        jela = novaJela,
                         medicinskoUpozorenje = novoMedUpozorenje,
                         zemljisniTipovi = noviZemljisniTipovi,
                         klimatskiTipovi = noviKlimatskiTipovi
