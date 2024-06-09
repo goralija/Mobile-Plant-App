@@ -2,6 +2,7 @@ package ba.unsa.etf.rma.spirala1
 
 import android.content.Context
 import android.graphics.Bitmap
+import android.graphics.BitmapFactory
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
@@ -15,12 +16,14 @@ import kotlinx.coroutines.Job
 import kotlinx.coroutines.launch
 import ba.unsa.etf.rma.spirala1.TrefleDAO.Result
 import kotlinx.coroutines.withContext
+import java.net.URL
 
 class BiljkaListAdapter(private var biljke: List<Biljka>, private var selectedMode: String,
                         private val itemClickListener: OnItemClickListener, private val mainActivity: MainActivity) :
     RecyclerView.Adapter<BiljkaListAdapter.BiljkaViewHolder>() {
 
     var clickablePlants: Boolean = true
+    private var biljkaDAO: BiljkaDAO = BiljkaDatabase.getDatabase(mainActivity).biljkaDao()
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): BiljkaViewHolder {
         val viewId = when (selectedMode) {
@@ -60,11 +63,18 @@ class BiljkaListAdapter(private var biljke: List<Biljka>, private var selectedMo
         val scope = CoroutineScope(Job() + Dispatchers.Main)
 
         scope.launch {
-            val result = TrefleDAO().getImage(biljke[position])
+            val existingImage = biljkaDAO.getImageByIdBiljke(biljke[position].id)
+            if (existingImage != null)
+                holder.slika.setImageBitmap((existingImage.bitmap))
+            else {
+                val result = TrefleDAO().getImage(biljke[position])
 
-            when(result){
-                is Result.Success<Bitmap> -> {holder.slika.setImageBitmap(result.data)}
-                else -> {}
+                when (result) {
+                    is Result.Success<Bitmap> -> {
+                        biljkaDAO.addImage(biljke[position].id, result.data)
+                        holder.slika.setImageBitmap(result.data)
+                    } else -> {}
+                }
             }
         }
     }

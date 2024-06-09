@@ -2,56 +2,85 @@ package ba.unsa.etf.rma.spirala1
 
 import android.graphics.Bitmap
 import androidx.room.Dao
-import androidx.room.Delete
 import androidx.room.Insert
 import androidx.room.OnConflictStrategy
 import androidx.room.Query
+import androidx.room.Transaction
 import androidx.room.Update
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.withContext
 
 @Dao
 interface BiljkaDAO {
-
     @Insert(onConflict = OnConflictStrategy.IGNORE)
-    suspend fun saveBiljka(biljka: Biljka): Boolean
-        //spašava biljku u bazu. Vraća true ako je uspješno dodana biljka inače vraća false
+    suspend fun insertImage(biljkaBitmap: BiljkaBitmap): Long
 
+    @Query("SELECT * FROM biljka WHERE id = :idBiljke LIMIT 1")
+    suspend fun getBiljkaById(idBiljke: Long): Biljka?
 
+    @Query("SELECT * FROM biljka_bitmap WHERE idBiljke = :idBiljke LIMIT 1")
+    suspend fun getImageByIdBiljke(idBiljke: Long): BiljkaBitmap?
 
+    @Insert(onConflict = OnConflictStrategy.REPLACE)
+    suspend fun addImage(idBiljke: Long,bitmap: Bitmap):Boolean {
+        return withContext(Dispatchers.IO) {
+            val biljka = getBiljkaById(idBiljke)
+            val existingImage = getImageByIdBiljke(idBiljke)
 
-
-    //ove metode su tu samo da posluže za lakšu izradu metoda
-    //koje će se moći pozvati kroz Repository klasu
+            if (biljka == null || existingImage != null) {
+                false
+            } else {
+                val biljkaBitmap = BiljkaBitmap(idBiljke = idBiljke, bitmap = bitmap)
+                insertImage(biljkaBitmap) != -1L
+            }
+        }
+    }
     @Query("SELECT * FROM Biljka WHERE online_checked = 0")
     suspend fun getOfflineBiljkas(): List<Biljka>
 
-    @Update
-    suspend fun updateBiljka(biljka: Biljka) : Int
+    @Transaction
+    suspend fun fixOfflineBiljka(fixData: suspend (Biljka) -> Biljka): Int {
+        val offlineBiljkas = getOfflineBiljkas()
+        var updatedCount = 0
 
-    @Query("SELECT * FROM biljka WHERE id = :idBiljke")
-    suspend fun getBiljkaById(idBiljke: Long): Biljka?
+        for (biljka in offlineBiljkas) {
+            val fixedBiljka = fixData(biljka)
+            if (biljka != fixedBiljka) {
+                saveBiljka(fixedBiljka.copy(onlineChecked = true))
+                updatedCount++
+            }
+        }
 
-    @Insert(onConflict = OnConflictStrategy.REPLACE)
-    suspend fun addImage(biljkaBitmap: BiljkaBitmap): Long
-
-
-
-
-
-
-    @Update
-    suspend fun fixOfflineBiljka():Int
-        //pokreće fixData metodu za sve biljke iz baze koje imaju vrijednost atributa onlineChecked na false i ažurira biljke u bazi na osnovu rezultata poziva metode.
-        //Vraća broj ažuriranih biljaka u bazi. Biljka se smatra da je ažurirana ako je bar jedan atribut nakon poziva fixData metode promijenjen.
+        return updatedCount
+    }
 
     @Insert(onConflict = OnConflictStrategy.REPLACE)
-    suspend fun addImage(idBiljke: Long,bitmap: Bitmap):Boolean
-        //dodaje sliku biljke u bazu i vraća true ako je uspješno dodavanje, a ako slika za zadanu biljku postoji ili biljka ne postoji vraća false
+    suspend fun saveToDatabase(biljka: Biljka): Long
 
-    @Query("SELECT * FROM Biljka")
-    suspend fun getAllBiljkas():List<Biljka>
-        //vraća sve biljke iz baze podataka
+    @Transaction
+    suspend fun saveBiljka(biljka: Biljka): Boolean {
+        return withContext(Dispatchers.IO) {
+            try {
+                val id = saveToDatabase(biljka)
+                id != -1L
+            } catch (e: Exception) {
+                false
+            }
+        }
+    }
 
-    @Query("DELETE FROM Biljka")
-    suspend fun clearData()
-        //briše sve biljke i slike iz baze podataka
+    @Query("SELECT * FROM biljka")
+    suspend fun getAllBiljkas(): List<Biljka>
+
+    @Query("DELETE FROM biljka")
+    suspend fun clearBiljkas()
+
+    @Query("DELETE FROM biljka_bitmap")
+    suspend fun clearBiljkaBitmaps()
+
+    @Transaction
+    suspend fun clearData() {
+        clearBiljkas()
+        clearBiljkaBitmaps()
+    }
 }

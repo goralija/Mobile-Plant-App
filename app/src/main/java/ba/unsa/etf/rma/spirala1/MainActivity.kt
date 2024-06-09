@@ -27,9 +27,10 @@ import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 
 class MainActivity : AppCompatActivity() {
+    private lateinit var biljkaDAO: BiljkaDAO
     private lateinit var biljkePogled: RecyclerView
     private lateinit var biljkeAdapter: BiljkaListAdapter
-    private var biljkeLista = biljke
+    private var biljkeLista: List<Biljka> = listOf()
     private var modPrikaza = "Medicinski fokus"
 
     private lateinit var pretragaPolje: ConstraintLayout
@@ -82,13 +83,19 @@ class MainActivity : AppCompatActivity() {
         enableEdgeToEdge()
         setContentView(R.layout.activity_main)
 
+        biljkaDAO = BiljkaDatabase.getDatabase(this@MainActivity).biljkaDao()
+        //clearDatabase()
+
         biljkePogled = findViewById(R.id.biljkeRV)
         biljkePogled.layoutManager = LinearLayoutManager(this, LinearLayoutManager.VERTICAL, false)
+        biljkeAdapter = BiljkaListAdapter(listOf(), modPrikaza, itemClickListener, this)
+        biljkePogled.adapter = biljkeAdapter
+
+        fetchAllBiljkas()
 
         val resetButton = findViewById<Button>(R.id.resetBtn)
         resetButton.setOnClickListener {
-            biljkeLista = biljke
-            biljkeAdapter.updateBiljke(biljkeLista)
+            fetchAllBiljkas()
         }
 
         val novaBiljkaBtn = findViewById<FloatingActionButton>(R.id.novaBiljkaBtn)
@@ -108,23 +115,19 @@ class MainActivity : AppCompatActivity() {
                 val selectedOption = parent.getItemAtPosition(position) as String
                 Toast.makeText(this@MainActivity, "Selected: $selectedOption", Toast.LENGTH_SHORT).show()
                 modPrikaza = selectedOption
-                biljkeAdapter = BiljkaListAdapter(listOf(),modPrikaza, itemClickListener, this@MainActivity)
+                biljkeAdapter = BiljkaListAdapter(listOf(), modPrikaza, itemClickListener, this@MainActivity)
                 biljkePogled.adapter = biljkeAdapter
 
                 biljkeAdapter.updateBiljke(biljkeLista)
             }
             override fun onNothingSelected(parent: AdapterView<*>) {}
         }
-
-
-
         //dio koji dodajemo kako bi se prikazali novi elementi u botanickom modu
 
         pretragaET = findViewById(R.id.pretragaET)
         bojaSPIN = findViewById(R.id.bojaSPIN)
         brzaPretraga = findViewById(R.id.brzaPretraga)
         pretragaPolje = findViewById(R.id.pretragaPolje)
-
         ArrayAdapter.createFromResource(
             this,
             R.array.colors_array,
@@ -133,6 +136,7 @@ class MainActivity : AppCompatActivity() {
             adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item)
             bojaSPIN.adapter = adapter
         }
+
         brzaPretraga.setOnClickListener {
             // ako pretragaET nije prazno i odabrana je neka boja, tada se unutar R.id.biljkeRV prikaže rezultat poziva metode getPlantsWithFlowerColor
 
@@ -140,13 +144,10 @@ class MainActivity : AppCompatActivity() {
             val selectedColor = bojaSPIN.selectedItem?.toString()
             if (searchText.isNotEmpty() && !selectedColor.isNullOrEmpty()) {
                     val scope = CoroutineScope(Job() + Dispatchers.Main)
-
                     scope.launch {
                         val result = TrefleDAO().getPlantsWithFlowerColor(selectedColor, searchText)
                         updateRecyclerView(result,false)
                     }
-
-
             } else {
                 Toast.makeText(
                     this@MainActivity,
@@ -155,6 +156,20 @@ class MainActivity : AppCompatActivity() {
                 ).show()
             }
             setBotanicMode(false)
+        }
+    }
+
+    private fun clearDatabase() {
+        CoroutineScope(Dispatchers.IO).launch {
+            biljkaDAO.clearData()
+        }
+    }
+    private fun fetchAllBiljkas() {
+        CoroutineScope(Dispatchers.IO).launch {
+            biljkeLista = biljkaDAO.getAllBiljkas()
+            withContext(Dispatchers.Main) {
+                biljkeAdapter.updateBiljke(biljkeLista)
+            }
         }
     }
 }

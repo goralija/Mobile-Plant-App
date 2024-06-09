@@ -13,7 +13,7 @@ import java.io.Serializable
 @Entity
 @TypeConverters(Converters::class)
 data class Biljka(
-    @PrimaryKey(autoGenerate = true) val id: Int,
+    @PrimaryKey(autoGenerate = true) @ColumnInfo(name = "id") val id: Long = 0,
     @ColumnInfo(name = "naziv") @SerializedName("naziv") var naziv: String,
     @ColumnInfo(name = "porodica") @SerializedName("porodica") var porodica: String,
     @ColumnInfo(name = "medicinsko_upozorenje") @SerializedName("medicinsko_upozorenje") var medicinskoUpozorenje: String?,

@@ -7,7 +7,7 @@ import androidx.room.ForeignKey
 import androidx.room.PrimaryKey
 import androidx.room.TypeConverters
 
-@Entity
+@Entity (tableName = "biljka_bitmap")
 @TypeConverters(Converters::class)
 data class BiljkaBitmap(
     @PrimaryKey val idBiljke: Long,

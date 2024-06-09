@@ -20,6 +20,8 @@ import kotlinx.coroutines.withContext
 
 class NovaBiljkaActivity : AppCompatActivity() {
 
+    private lateinit var biljkaDAO: BiljkaDAO
+
     private lateinit var nazivET: EditText
     private lateinit var porodicaET: EditText
     private lateinit var medicinskoUpozorenjeET: EditText
@@ -37,6 +39,7 @@ class NovaBiljkaActivity : AppCompatActivity() {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+        biljkaDAO = BiljkaDatabase.getDatabase(this).biljkaDao()
         setContentView(R.layout.nova_biljka)
         initializeViews()
         setupListViews()
@@ -155,9 +158,9 @@ class NovaBiljkaActivity : AppCompatActivity() {
                 }
                 val selectedProfilOkusa = ProfilOkusaBiljke.values()[profilOkusaLV.checkedItemPosition]
                 var jela = jelaList.toMutableList()
-                val novaBiljka = Biljka(naziv, porodica, medicinskoUpozorenje,
+                val novaBiljka = Biljka(0, naziv, porodica, medicinskoUpozorenje,
                     selectedMedicinskaKorist, selectedProfilOkusa, jela, selectedKlimatskiTip,
-                    selectedZemljisniTip)
+                    selectedZemljisniTip, false)
 
                 Log.v("biljkaaaa1-------",novaBiljka.toString())
 
@@ -168,7 +171,15 @@ class NovaBiljkaActivity : AppCompatActivity() {
 
                     Log.v("biljkaaaa2-------",fixedBiljka.toString())
 
-                    biljke.add(fixedBiljka)
+                    val result = biljkaDAO.saveBiljka(fixedBiljka)
+                    withContext(Dispatchers.Main) {
+                        if (result) {
+                            Toast.makeText(this@NovaBiljkaActivity, "Biljka dodata uspješno", Toast.LENGTH_SHORT).show()
+                        } else {
+                            Toast.makeText(this@NovaBiljkaActivity, "Pogreška pri dodavanju biljke", Toast.LENGTH_SHORT).show()
+                        }
+                    }
+
                     val intent = Intent(this@NovaBiljkaActivity, MainActivity::class.java).putExtra("novaBiljka", fixedBiljka)
                     startActivity(intent)
                     finish()
