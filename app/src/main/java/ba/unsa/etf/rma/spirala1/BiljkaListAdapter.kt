@@ -51,14 +51,6 @@ class BiljkaListAdapter(private var biljke: List<Biljka>, private var selectedMo
         holder.profilOkusa?.text = biljke[position].profilOkusa?.opis
         holder.zemljisniTip?.text = biljke[position].zemljisniTipovi.getOrNull(0)?.naziv ?: ""
         val context: Context = holder.slika.context
-        //var id: Int = context.resources.getIdentifier("cvijet","drawable", context.packageName)
-        //holder.slika.setImageResource(id)
-
-
-        if (selectedMode == getString(context, R.string.botanic))
-            mainActivity.setBotanicMode(true)
-        else
-            mainActivity.setBotanicMode(false)
 
         val scope = CoroutineScope(Job() + Dispatchers.Main)
 
@@ -76,6 +68,11 @@ class BiljkaListAdapter(private var biljke: List<Biljka>, private var selectedMo
                 } else holder.slika.setImageBitmap(bb?.bitmap)
             }
         }
+
+        if (selectedMode == getString(context, R.string.botanic))
+            mainActivity.setBotanicMode(true)
+        else
+            mainActivity.setBotanicMode(false)
 
     }
     fun updateBiljke(biljke: List<Biljka>, clickable: Boolean=true) {

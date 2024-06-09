@@ -148,8 +148,6 @@ class MainActivity : AppCompatActivity() {
         }
 
         brzaPretraga.setOnClickListener {
-            // ako pretragaET nije prazno i odabrana je neka boja, tada se unutar R.id.biljkeRV prikaže rezultat poziva metode getPlantsWithFlowerColor
-
             val searchText = pretragaET.text.toString()
             val selectedColor = bojaSPIN.selectedItem?.toString()
             if (searchText.isNotEmpty() && !selectedColor.isNullOrEmpty()) {

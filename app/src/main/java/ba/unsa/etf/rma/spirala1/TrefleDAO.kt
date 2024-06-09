@@ -112,6 +112,13 @@ class TrefleDAO {
                     val jsonObject =
                         JsonParser.parseString(response).asJsonObject.getAsJsonObject("data")
 
+                    var name: String = ""
+
+                    name += jsonObject.get("common_name")?.takeIf { it != JsonNull.INSTANCE }?.asString ?: ""
+                    name += "("
+                    name += jsonObject.get("scientific_name").asString
+                    name += ")"
+
                     val familyName = jsonObject.getAsJsonObject("main_species").get("family")
                         ?.takeIf { it != JsonNull.INSTANCE }?.asString ?: biljka.porodica
 
@@ -161,6 +168,7 @@ class TrefleDAO {
                     if (noviKlimatskiTipovi.isEmpty()) noviKlimatskiTipovi = biljka.klimatskiTipovi.toMutableList()
 
                     nova = nova.copy(
+                        naziv = name,
                         porodica = familyName,
                         jela = novaJela,
                         medicinskoUpozorenje = novoMedUpozorenje,
