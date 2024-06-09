@@ -19,5 +19,5 @@ import androidx.room.TypeConverters
 @TypeConverters(Converters::class)
 data class BiljkaBitmap(
     @PrimaryKey val idBiljke: Long,
-    @ColumnInfo(typeAffinity = ColumnInfo.BLOB) val bitmap: Bitmap //ili Bitmap
+    @ColumnInfo(typeAffinity = ColumnInfo.BLOB) val bitmap: Bitmap
 )

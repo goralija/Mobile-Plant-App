@@ -29,10 +29,7 @@ interface BiljkaDAO {
         return if (biljka != null && biljkaBitmap == null) {
             insertImage(BiljkaBitmap(idBiljke, bitmap))
             true
-        } else {
-            false
-        }
-
+        } else { false }
     }
     @Query("SELECT * FROM Biljka WHERE online_checked = 0")
     suspend fun getOfflineBiljkas(): List<Biljka>
