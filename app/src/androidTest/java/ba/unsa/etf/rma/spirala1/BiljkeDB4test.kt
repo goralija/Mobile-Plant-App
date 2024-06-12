@@ -1,10 +1,9 @@
 package ba.unsa.etf.rma.spirala1
+
 import android.content.Context
 import android.graphics.Bitmap
-import android.util.Log
 import androidx.core.database.getStringOrNull
 import androidx.room.Room
-import androidx.room.TypeConverters
 import androidx.sqlite.db.SupportSQLiteDatabase
 import androidx.test.core.app.ActivityScenario
 import androidx.test.core.app.ApplicationProvider
@@ -110,16 +109,12 @@ class BiljkeDB4test {
 
     @Test
     fun a1_tableBiljkaHasAllColumns() = runBlocking {
-        for (kolona in kolone["Biljka"]!!) {
-            checkColumns(describeBiljka, "Biljka")
-        }
+        checkColumns(describeBiljka, "Biljka")
     }
 
     @Test
     fun a2_tableBiljkaBitmapHasAllColumns() = runBlocking {
-        for (kolona in kolone["BiljkaBitmap"]!!) {
-            checkColumns(describeBiljkaBitmap, "BiljkaBitmap")
-        }
+        checkColumns(describeBiljkaBitmap, "BiljkaBitmap")
     }
 
     @Test
@@ -158,12 +153,12 @@ class BiljkeDB4test {
 
     @Test
     fun a6_addSlikaAndCheckItsAdded() = runBlocking {
-        //executeCountAndCheck(countBiljkaBitmaps, "broj_bitmapa", 0)
+        executeCountAndCheck(countBiljkaBitmaps, "broj_bitmapa", 0)
         var biljka1 = biljkaDAO.getAllBiljkas().get(0).id
         var bitmap = Bitmap.createBitmap(200, 300, Bitmap.Config.ARGB_8888)
         //napravite da je prvi parametar BiljkaBitmap id koji je PrimaryKey(autoGenerate=true)
-        biljkaDAO.addImage(BiljkaBitmap(null, biljka1 ?: 0, bitmap))
-        //executeCountAndCheck(countBiljkaBitmaps, "broj_bitmapa", 1)
+        biljkaDAO.addImage(biljka1 ?: 0, bitmap)
+        executeCountAndCheck(countBiljkaBitmaps, "broj_bitmapa", 1)
         var bitmapCursor = db.query("SELECT bitmap FROM BiljkaBitmap")
         bitmapCursor.moveToFirst()
         assertThat(bitmapCursor.getStringOrNull(0)?.length ?: 0, greaterThan(100))
@@ -177,4 +172,3 @@ class BiljkeDB4test {
     }
 
 }
-

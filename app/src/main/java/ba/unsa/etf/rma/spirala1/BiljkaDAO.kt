@@ -24,9 +24,7 @@ interface BiljkaDAO {
     suspend fun getImageByIdBiljke(idBiljke: Long): BiljkaBitmap?
 
     @Insert(onConflict = OnConflictStrategy.REPLACE)
-    suspend fun addImage(b: BiljkaBitmap):Boolean {
-        val idBiljke = b.idBiljke
-        val bitmap = b.bitmap
+    suspend fun addImage(idBiljke: Long, bitmap: Bitmap):Boolean {
         val biljka = getBiljkaById(idBiljke)
         val biljkaBitmap = getImageByIdBiljke(idBiljke)
 
@@ -35,7 +33,7 @@ interface BiljkaDAO {
             true
         } else { false }
     }
-    @Query("SELECT * FROM Biljka WHERE online_checked = 0")
+    @Query("SELECT * FROM Biljka WHERE onlineChecked = 0")
     suspend fun getOfflineBiljkas(): List<Biljka>
 
     @Transaction

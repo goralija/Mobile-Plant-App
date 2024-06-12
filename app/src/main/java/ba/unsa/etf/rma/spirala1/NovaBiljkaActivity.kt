@@ -158,7 +158,7 @@ class NovaBiljkaActivity : AppCompatActivity() {
                 }
                 val selectedProfilOkusa = ProfilOkusaBiljke.values()[profilOkusaLV.checkedItemPosition]
                 var jela = jelaList.toMutableList()
-                val novaBiljka = Biljka(id=0, naziv=naziv, porodica=porodica, medicinskoUpozorenje=medicinskoUpozorenje,
+                val novaBiljka = Biljka(id=null, naziv=naziv, porodica=porodica, medicinskoUpozorenje=medicinskoUpozorenje,
                     medicinskeKoristi = selectedMedicinskaKorist, profilOkusa = selectedProfilOkusa, jela = jela, klimatskiTipovi = selectedKlimatskiTip,
                     zemljisniTipovi = selectedZemljisniTip, onlineChecked = false)
 

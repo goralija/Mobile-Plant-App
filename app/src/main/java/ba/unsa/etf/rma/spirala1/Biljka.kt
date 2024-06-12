@@ -22,7 +22,7 @@ data class Biljka(
     @ColumnInfo(name = "jela") @SerializedName("jela") var jela: List<String>,
     @ColumnInfo(name = "klimatskiTipovi") @SerializedName("klimatskiTipovi") var klimatskiTipovi: List<KlimatskiTip>,
     @ColumnInfo(name = "zemljisniTipovi") @SerializedName("zemljisniTipovi") var zemljisniTipovi: List<Zemljište>,
-    @ColumnInfo(name = "online_checked") @SerializedName("online_checked") var onlineChecked: Boolean = false,
+    @ColumnInfo(name = "onlineChecked") @SerializedName("onlineChecked") var onlineChecked: Boolean = false,
 ) : Serializable
 
 

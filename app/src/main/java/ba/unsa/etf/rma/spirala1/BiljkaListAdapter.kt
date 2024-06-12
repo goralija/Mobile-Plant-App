@@ -52,6 +52,9 @@ class BiljkaListAdapter(private var biljke: List<Biljka>, private var selectedMo
         holder.zemljisniTip?.text = biljke[position].zemljisniTipovi.getOrNull(0)?.naziv ?: ""
         val context: Context = holder.slika.context
 
+        val id = context.resources.getIdentifier("ic_launcher","mipmap",context.packageName)
+        holder.slika.setImageResource(id)
+
         val scope = CoroutineScope(Job() + Dispatchers.Main)
 
         scope.launch {
@@ -61,7 +64,7 @@ class BiljkaListAdapter(private var biljke: List<Biljka>, private var selectedMo
                     val result = TrefleDAO().getImage(biljke[position])
                     when (result) {
                         is Result.Success<Bitmap> -> {
-                            biljke[position].id?.let { biljkaDAO.addImage(BiljkaBitmap(null,it,result.data)) }
+                            biljke[position].id?.let { biljkaDAO.addImage(it,result.data) }
                             holder.slika.setImageBitmap(result?.data)
                         } else -> {}
                     }
