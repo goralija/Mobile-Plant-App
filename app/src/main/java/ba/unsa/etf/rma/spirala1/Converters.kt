@@ -8,17 +8,22 @@ import com.google.gson.reflect.TypeToken
 import kotlinx.coroutines.CoroutineStart
 import java.io.ByteArrayOutputStream
 import kotlin.io.encoding.Base64
+import kotlin.io.encoding.ExperimentalEncodingApi
 
 class Converters {
+    @OptIn(ExperimentalEncodingApi::class)
     @TypeConverter
-    fun fromBitmap(bitmap: Bitmap): ByteArray {
+    fun fromBitmap(bitmap: Bitmap): String {
         val outputStream = ByteArrayOutputStream()
         bitmap.compress(Bitmap.CompressFormat.PNG, 100, outputStream)
-        return outputStream.toByteArray()
+        val byteArray = outputStream.toByteArray()
+        return Base64.encode(byteArray)
     }
 
     @TypeConverter
-    fun toBitmap(byteArray: ByteArray): Bitmap {
+    @OptIn(ExperimentalEncodingApi::class)
+    fun toBitmap(encodedString: String): Bitmap {
+        val byteArray = Base64.decode(encodedString)
         return BitmapFactory.decodeByteArray(byteArray, 0, byteArray.size)
     }
 

@@ -6,11 +6,13 @@ import androidx.room.Insert
 import androidx.room.OnConflictStrategy
 import androidx.room.Query
 import androidx.room.Transaction
+import androidx.room.TypeConverters
 import androidx.room.Update
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 
 @Dao
+@TypeConverters (Converters::class)
 interface BiljkaDAO {
     @Insert(onConflict = OnConflictStrategy.REPLACE)
     suspend fun insertImage(biljkaBitmap: BiljkaBitmap): Long
