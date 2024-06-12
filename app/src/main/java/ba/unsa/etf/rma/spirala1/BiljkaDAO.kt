@@ -18,16 +18,18 @@ interface BiljkaDAO {
     @Query("SELECT * FROM biljka WHERE id = :idBiljke")
     suspend fun getBiljkaById(idBiljke: Long): Biljka?
 
-    @Query("SELECT * FROM biljka_bitmap WHERE idBiljke = :idBiljke")
+    @Query("SELECT * FROM BiljkaBitmap WHERE idBiljke = :idBiljke")
     suspend fun getImageByIdBiljke(idBiljke: Long): BiljkaBitmap?
 
     @Insert(onConflict = OnConflictStrategy.REPLACE)
-    suspend fun addImage(idBiljke: Long,bitmap: Bitmap):Boolean {
+    suspend fun addImage(b: BiljkaBitmap):Boolean {
+        val idBiljke = b.idBiljke
+        val bitmap = b.bitmap
         val biljka = getBiljkaById(idBiljke)
         val biljkaBitmap = getImageByIdBiljke(idBiljke)
 
         return if (biljka != null && biljkaBitmap == null) {
-            insertImage(BiljkaBitmap(idBiljke, bitmap))
+            insertImage(BiljkaBitmap(null, idBiljke, bitmap))
             true
         } else { false }
     }
@@ -71,7 +73,7 @@ interface BiljkaDAO {
     @Query("DELETE FROM biljka")
     suspend fun clearBiljkas()
 
-    @Query("DELETE FROM biljka_bitmap")
+    @Query("DELETE FROM BiljkaBitmap")
     suspend fun clearBiljkaBitmaps()
 
     @Transaction

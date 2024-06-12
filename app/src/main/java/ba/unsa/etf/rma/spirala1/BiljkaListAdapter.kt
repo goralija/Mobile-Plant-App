@@ -56,12 +56,12 @@ class BiljkaListAdapter(private var biljke: List<Biljka>, private var selectedMo
 
         scope.launch {
             if (position < biljke.size) {
-                val bb = biljkaDAO.getImageByIdBiljke(biljke[position].id)
+                val bb = biljke[position].id?.let { biljkaDAO.getImageByIdBiljke(it) }
                 if (bb == null) {
                     val result = TrefleDAO().getImage(biljke[position])
                     when (result) {
                         is Result.Success<Bitmap> -> {
-                            biljkaDAO.addImage(biljke[position].id, result.data)
+                            biljke[position].id?.let { biljkaDAO.addImage(BiljkaBitmap(null,it,result.data)) }
                             holder.slika.setImageBitmap(result?.data)
                         } else -> {}
                     }

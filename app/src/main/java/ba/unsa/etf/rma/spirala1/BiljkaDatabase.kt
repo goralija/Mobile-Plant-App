@@ -6,7 +6,7 @@ import androidx.room.Room
 import androidx.room.RoomDatabase
 import androidx.room.TypeConverters
 
-@Database(entities = [Biljka::class, BiljkaBitmap::class], version = 2)
+@Database(entities = [Biljka::class, BiljkaBitmap::class], version = 8)
 @TypeConverters(Converters::class)
 abstract class BiljkaDatabase : RoomDatabase() {
     abstract fun biljkaDao(): BiljkaDAO

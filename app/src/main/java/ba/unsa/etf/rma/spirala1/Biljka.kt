@@ -13,16 +13,16 @@ import java.io.Serializable
 @Entity
 @TypeConverters(Converters::class)
 data class Biljka(
-    @PrimaryKey(autoGenerate = true) @ColumnInfo(name = "id") val id: Long = 0,
+    @PrimaryKey(autoGenerate = true) var id: Long? = null,
     @ColumnInfo(name = "naziv") @SerializedName("naziv") var naziv: String,
-    @ColumnInfo(name = "porodica") @SerializedName("porodica") var porodica: String,
-    @ColumnInfo(name = "medicinsko_upozorenje") @SerializedName("medicinsko_upozorenje") var medicinskoUpozorenje: String?,
-    @ColumnInfo(name = "medicinske_koristi") @SerializedName("medicinske_koristi") val medicinskeKoristi: List<MedicinskaKorist>,
-    @ColumnInfo(name = "profil_okusa") @SerializedName("profil_okusa") val profilOkusa: ProfilOkusaBiljke?,
+    @ColumnInfo(name = "family") @SerializedName("family") var porodica: String,
+    @ColumnInfo(name = "medicinskoUpozorenje") @SerializedName("medicinskoUpozorenje") var medicinskoUpozorenje: String?,
+    @ColumnInfo(name = "medicinskeKoristi") @SerializedName("medicinskeKoristi") val medicinskeKoristi: List<MedicinskaKorist>,
+    @ColumnInfo(name = "profilOkusa") @SerializedName("profilOkusa") val profilOkusa: ProfilOkusaBiljke?,
     @ColumnInfo(name = "jela") @SerializedName("jela") var jela: List<String>,
-    @ColumnInfo(name = "klimatski_tipovi") @SerializedName("klimatski_tipovi") var klimatskiTipovi: List<KlimatskiTip>,
-    @ColumnInfo(name = "zemljisni_tipovi") @SerializedName("zemljisni_tipovi") var zemljisniTipovi: List<Zemljište>,
-    @ColumnInfo(name = "online_checked") @SerializedName("online_checked") var onlineChecked: Boolean,
+    @ColumnInfo(name = "klimatskiTipovi") @SerializedName("klimatskiTipovi") var klimatskiTipovi: List<KlimatskiTip>,
+    @ColumnInfo(name = "zemljisniTipovi") @SerializedName("zemljisniTipovi") var zemljisniTipovi: List<Zemljište>,
+    @ColumnInfo(name = "online_checked") @SerializedName("online_checked") var onlineChecked: Boolean = false,
 ) : Serializable
 
 

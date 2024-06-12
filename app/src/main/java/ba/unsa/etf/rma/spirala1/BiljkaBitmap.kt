@@ -6,9 +6,9 @@ import androidx.room.Entity
 import androidx.room.ForeignKey
 import androidx.room.PrimaryKey
 import androidx.room.TypeConverters
+import com.google.gson.annotations.SerializedName
 
 @Entity(
-    tableName = "biljka_bitmap",
     foreignKeys = [ForeignKey(
         entity = Biljka::class,
         parentColumns = ["id"],
@@ -18,6 +18,7 @@ import androidx.room.TypeConverters
 )
 @TypeConverters(Converters::class)
 data class BiljkaBitmap(
-    @PrimaryKey val idBiljke: Long,
-    @ColumnInfo(typeAffinity = ColumnInfo.BLOB) val bitmap: Bitmap
+    @PrimaryKey(autoGenerate = true) var id:Long?=null,
+    @ColumnInfo(name = "idBiljke") @SerializedName("idBiljke") val idBiljke: Long,
+    @ColumnInfo(name = "bitmap") @SerializedName("bitmap") val bitmap: Bitmap
 )
