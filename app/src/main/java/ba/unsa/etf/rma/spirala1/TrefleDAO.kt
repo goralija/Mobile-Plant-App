@@ -57,7 +57,7 @@ class TrefleDAO {
         return withContext(Dispatchers.IO){
             try{
                 val latinski = dajLatinski(biljka.naziv.toString())
-                val url1 = "https://trefle.io/api/v1/plants/search?q=$latinski&token=$apiKey"
+                val url1 = "http://trefle.io/api/v1/plants/search?q=$latinski&token=$apiKey"
                 val url = URL(url1)
                 (url.openConnection() as? HttpURLConnection)?.run{
                     val result = this.inputStream.bufferedReader().use{it.readText()}
@@ -89,7 +89,7 @@ class TrefleDAO {
         return withContext(Dispatchers.IO) {
             try {
                 val latinski = dajLatinski(biljka.naziv.toString())
-                val urll = "https://trefle.io/api/v1/plants/search?q=$latinski&token=$apiKey"
+                val urll = "http://trefle.io/api/v1/plants/search?q=$latinski&token=$apiKey"
                 val url = URL(urll)
                 var id: Int = 0
 
@@ -104,7 +104,7 @@ class TrefleDAO {
                     }
                 } ?: throw Exception("Failed to open connection")
 
-                val urlll = URL("https://trefle.io/api/v1/plants/$id?token=$apiKey")
+                val urlll = URL("http://trefle.io/api/v1/plants/$id?token=$apiKey")
                 var nova: Biljka = biljka
 
                 (urlll.openConnection() as? HttpURLConnection)?.run {
@@ -177,11 +177,11 @@ class TrefleDAO {
 
                 return@withContext nova
             } catch (e: MalformedURLException) {
-                throw Exception("Cannot open HttpURLConnection", e)
+                /*throw Exception("Cannot open HttpURLConnection", e)*/ return@withContext biljka
             } catch (e: IOException) {
-                throw Exception("Cannot read stream", e)
+                /*throw Exception("Cannot read stream", e)*/ return@withContext biljka
             } catch (e: JsonParseException) {
-                throw Exception("Cannot parse JSON", e)
+                /*throw Exception("Cannot parse JSON", e)*/ return@withContext biljka
             }
         }
     }
@@ -190,7 +190,7 @@ class TrefleDAO {
         return withContext(Dispatchers.IO) {
             try {
                 var ajdijevi = emptyList<Int>().toMutableList()
-                val urll = "https://trefle.io/api/v1/plants/search?q=$substr&token=$apiKey&filter[flower_color]=$flowerColor"
+                val urll = "http://trefle.io/api/v1/plants/search?q=$substr&token=$apiKey&filter[flower_color]=$flowerColor"
                 val url = URL(urll)
                 val listaTrazenihBiljki = mutableListOf<Biljka>()
 
@@ -204,7 +204,7 @@ class TrefleDAO {
                 }
 
                 for (k in 0 until ajdijevi.size) {
-                    val urlll = "https://trefle.io/api/v1/plants/${ajdijevi[k]}?token=$apiKey"
+                    val urlll = "http://trefle.io/api/v1/plants/${ajdijevi[k]}?token=$apiKey"
                     val url2 = URL(urlll)
 
                     (url2.openConnection() as? HttpURLConnection)?.run {
@@ -253,11 +253,11 @@ class TrefleDAO {
                 }
                 return@withContext listaTrazenihBiljki
             } catch (e: MalformedURLException) {
-                throw Exception("Cannot open HttpURLConnection", e)
+                /*throw Exception("Cannot open HttpURLConnection", e)*/ return@withContext listOf()
             } catch (e: IOException) {
-                throw Exception("Cannot read stream", e)
+                /*throw Exception("Cannot read stream", e)*/ return@withContext listOf()
             } catch (e: JsonParseException) {
-                throw Exception("Cannot parse JSON", e)
+                /*throw Exception("Cannot parse JSON", e)*/ return@withContext listOf()
             }
         }
     }
