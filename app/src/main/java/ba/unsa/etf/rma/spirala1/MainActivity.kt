@@ -70,7 +70,7 @@ class MainActivity : AppCompatActivity() {
         bojaSPIN.visibility = visibility
         brzaPretraga.visibility = visibility
         biljkePogled.updateLayoutParams<ViewGroup.MarginLayoutParams> {
-            bottomMargin = if (isBotanic) 398 else 238
+            bottomMargin = if (isBotanic) 358 else 0
         }
     }
 
@@ -124,6 +124,7 @@ class MainActivity : AppCompatActivity() {
             override fun onItemSelected(parent: AdapterView<*>, view: View?, position: Int, id: Long) {
                 val selectedOption = parent.getItemAtPosition(position) as String
                 Toast.makeText(this@MainActivity, "Selected: $selectedOption", Toast.LENGTH_SHORT).show()
+                setBotanicMode(false)
                 modPrikaza = selectedOption
                 biljkeAdapter = BiljkaListAdapter(listOf(), modPrikaza, itemClickListener, this@MainActivity)
                 biljkePogled.adapter = biljkeAdapter
