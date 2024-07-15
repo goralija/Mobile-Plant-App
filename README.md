@@ -1,4 +1,4 @@
-Mobile Plant App
+#Mobile Plant App
 
 Mobile Plant App is an educational tool designed to provide comprehensive information about a wide variety of plants. Leveraging the Trefle.io API, the app grants access to a vast database of plant species, allowing users to explore detailed descriptions, images, and care tips. This app is perfect for plant enthusiasts, gardeners, and anyone interested in botany.
 
