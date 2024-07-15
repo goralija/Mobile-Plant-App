@@ -61,6 +61,6 @@ Dependencies
     Glide for image loading
     Room library for database management
 
-For questions or feedback, please contact the project owner at goralija@gmail.com.
+For questions or feedback, please contact the project owner at harun.goralija@gmail.com.
 * Repo owner or admin
 * Other community or team contact
